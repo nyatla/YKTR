@@ -5,9 +5,9 @@
     <!-- <RawDataStatus class="status" v-for="(status, index) in items"  :init_type="status.init_type" :key="index" ref="items"></RawDataStatus> -->
     <StatusDashboard :info="{ frequency: 99, ticks: 100 }" @debug="debug"></StatusDashboard>
     <ul class="status-ul">
-      <li v-for="(status, index) in statuses" :key="index">
-        <RxStatus v-if="status.type == 'rx'" :rawdata="status.rawdata"></RxStatus>
-      </li>
+        <li v-for="(status, index) in statuses" :key="index">
+            <RxStatus v-if="status.type == 'rx'" :rawdata="status.rawdata" :fixed="status.fixed"></RxStatus>
+        </li>
     </ul>
   </div>
 </template>
@@ -114,6 +114,8 @@ export default {
     },
     // eslint-disable-next-line no-unused-vars
     lost(event) {
+      let status = this.statuses.find(item => item.sid == this.current_sid);
+      status.fixed=true;
     },/*
       send(){
         //受信中なら閉じる
@@ -132,7 +134,8 @@ export default {
 }
 </script>
   
-<style scoped>
+<style lang="less" scoped>
+
 h1 {
   margin: auto 0;
   padding: auto 0;
@@ -141,12 +144,10 @@ h1 {
 .status-ul {
   list-style: none;
   margin: 0;
-  padding: 0;
-
-}
-
-.status {
-  margin-bottom: .5em;
+  padding: .25rem 0 0 0;
+  >li {
+    padding-bottom:.25rem;
+  }
 }
 
 .login {

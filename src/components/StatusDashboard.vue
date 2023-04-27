@@ -1,8 +1,11 @@
 <template>
   <div class="dashboard">
-    <div>
-      WAIT FOR SIGNAL
-    </div>
+    <Transition name="fade">
+      <div v-if="tttest">
+        WAIT FOR SIGNAL
+      </div>
+    </Transition>
+
     <div>{{ info.frequency }} Hz - {{info.ticks}} Ticks</div>
     <div>
       <progress id="rms" max="100" value="70"> 70% </progress>
@@ -29,6 +32,7 @@ export default
   },
   data() {
     return {
+      tttest:false,
       minimize:false,
       rms:0,
       time:new Date(),
@@ -52,6 +56,19 @@ export default
 </script>
 
 <style lang="less" scoped>
+  .fade-enter-active, .fade-leave-active {
+    transition: opacity 1s;
+  }
+  .fade-enter-from,
+  .fade-leave-to{
+    opacity: 0;
+  }
+  .fade-enter-to,
+  .fade-leave-from{
+    opacity: 1;
+  }
+
+
   .dashboard{
     background-color: #bbbbff;
     >:nth-child(1){

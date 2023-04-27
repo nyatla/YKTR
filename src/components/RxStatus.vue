@@ -1,26 +1,45 @@
 <template>
-  <div class="status">
+  <div :class="statusStyle">
     <div class="top">
       <div class="labels">
-        <div class="rx">RX</div>
+        <div :class="lavel1Style">RX</div>
         <div class="data">DATA</div>
       </div>
       <div class="date">{{ formattedDate }}</div>
     </div>
-    <ul class="contents">
-      <li v-if="visible.text">
-        <div class="title">TEXT</div>
-        <div class="text">
-          <div class="nodata" v-if="rawdata.length==0">NO DATA</div>
+    <div class="contents">
+      <div class="text" v-if="!fixed">
+        <div class="data data_running">
           <span 
-            v-for="(c,i) in fixedText" 
-            v-bind:key="i"
-            :class="{ 'hexascii': (typeof c)!='string' }"
+          v-for="(c,i) in fixedText" 
+          v-bind:key="i"
+          :class="{ 'hexascii': (typeof c)!='string' }"
           >{{((typeof c)=='string')?c:toHex(c,2)}}</span>
+        </div>
+        <div class="unfix_data">
           <span class="unfixed" v-for="(c,i) in unfixedText" v-bind:key="i">{{toHex(c,2)}}</span>
         </div>
-      </li>
-      <li v-if="visible.hex">
+      </div>
+      <div class="text" v-if="fixed">
+        <div class="data data_fixed">
+          <span 
+          v-for="(c,i) in allText" 
+          v-bind:key="i"
+          :class="{ 'hexascii': (typeof c)!='string' }"
+          >{{((typeof c)=='string')?c:toHex(c,2)}}</span>
+        </div>
+      </div>
+
+        <!-- 
+        <div class="fixed">
+          <span 
+          v-for="(c,i) in fixedText" 
+          v-bind:key="i"
+          :class="{ 'hexascii': (typeof c)!='string' }"
+          >{{((typeof c)=='string')?c:toHex(c,2)}}</span>
+          <span class="unfixed" v-for="(c,i) in unfixedText" v-bind:key="i">{{toHex(c,2)}}</span>
+        </div>-->
+      <!-- <li v-if="visible.hex">
         <div class="title">HEX({{rawdata.length }}byte)</div>
         <div class="hex">
           <div class="nodata" v-if="rawdata.length==0">NO DATA</div>
@@ -35,10 +54,9 @@
             </tr>
           </table>
         </div>
-      </li>
-    </ul>
+      </li> -->
+    </div>
   </div>
-
 </template>
 
 <script>
@@ -49,14 +67,13 @@ import {TBSKmodemJS} from "tbskmodem-js"
 export default
 {
   props: {
-    rawdata:Array
+    rawdata:Array,
+    fixed:Boolean
   },
   data() {
     return {
-      visible:{
-        text:true,
-        hex:true,
-        ax25:true
+      label:{
+        active:false
       },
       date:new Date(),
       sections:{
@@ -79,18 +96,9 @@ export default
         r='0'+r;
       }
       return r;
-    }    
-  },
-  computed: {
-    fixedText(){
-      let d=this.decoder; //デコーダー取得
-      let n=this.rawdata.slice(d.pt);//未解析の配列
-      let contents=this.sections.text.contents;
-      for(let i of n){
-        let darray=d.dec.update(i);
-        if(darray==null){
-          continue;
-        }
+    },
+    updateContentsData(contents,darray){
+      if(darray!=null){
         for(let j=0;j<darray.length;j++){
           if((typeof darray[j])=='string'){
             let cv=darray[j].charCodeAt();
@@ -107,8 +115,42 @@ export default
           }
         }
       }
-      d.pt+=n.length;
+      return contents;
+    }
+  },
+  computed: {
+    statusStyle(){
+      return "status "+(this.fixed?"status_fixed":"");
+    },
+    lavel1Style(){
+      return this.fixed?"rx-fixed":"rx-working";
+    },
+    dataRowStyle(){
+      return "data "+(this.fixed?"data-fixed":"data-working");
+    },
+    allText(){
+      let d=this.decoder; //デコーダー取得
+      let contents=this.sections.text.contents;
+      if(d.dec.pending.length>0){
+        let darray=d.dec.update();
+        this.updateContentsData(contents,darray);
+        d.pt++;
+      }
+      return contents;
+    },
 
+    fixedText(){
+      let d=this.decoder; //デコーダー取得
+      let n=this.rawdata.slice(d.pt);//未解析の配列
+      let contents=this.sections.text.contents;
+      for(let i of n){
+        let darray=d.dec.update(i);
+        if(darray==null){
+          continue;
+        }
+        this.updateContentsData(contents,darray);
+      }
+      d.pt+=n.length;
       return contents;
     },
     unfixedText(){
@@ -137,9 +179,10 @@ export default
 </script>
 
 <style lang="less" scoped>
+
+
 .status{
-  background-color:#ffbbbb;
-  padding:.1rem;
+  padding:.2rem;
   .top{
     display: flex;
     >.labels{
@@ -155,6 +198,16 @@ export default
         padding:0.1rem;
         margin: 0 .2rem 0 0;
       }
+      .rx-fixed{
+        background-color:#ffbbbb;
+        border: red 1px solid;
+        color:red;
+      }
+      .rx-working{
+        background-color:red;
+        border: red 1px solid;
+        color:white;
+      }
     }
     >.date{
       margin-left:auto;
@@ -165,38 +218,52 @@ export default
     }
   }
   .contents{
-    list-style-type:none;
     margin:0;
     padding:0;
-    .title{
-      font-size: .8rem;
-      font-weight:bold;
-      margin-left: 0;
-      margin-right: auto;
-      text-align: left;
-    }
-    .nodata{
-      padding:.2em;
-      background-color: #eeeeee;
-      text-align: center;
-    }
     .text{
-      padding:.2em;
-      background-color: #eeeeee;
+      position:relative;
+      padding:.2rem;
       text-align: left;
-      word-break: break-all;
-      >.hexascii{
-        border: 1px gray solid;
-        padding: 0 1px 0 1px;
-        font-size: 0.5em;
+      overflow:hidden;
+      height:1.2rem;
+
+      .data{
+        // position: absolute;
+        white-space:nowrap;
+        >.hexascii{
+          border: 1px gray solid;
+          padding: 0 1px 0 1px;
+          font-size: 0.5rem;
+        }
       }
-      >.unfixed{
-        text-decoration:underline;
-        color: red;
-        padding: 0 1px 0 1px;
-        font-size: 0.5em;
+      >.data_running{
+        position: absolute;
+        white-space:nowrap;
+        right:0;
       }
-    }        
+      >.data_fixed{
+      }
+
+      >.unfix_data{
+        position: absolute;
+        white-space:nowrap;
+        bottom:0;
+        right:0;
+        background-color: #eeeeee;
+        >.hexascii{
+          border: 1px gray solid;
+          padding: 0 1px 0 1px;
+          font-size: 0.5em;
+        }
+        >.unfixed{
+          text-decoration:underline;
+          color: red;
+          padding: 0 1px 0 1px;
+          font-size: 0.8em;
+        }
+      }
+
+    }        /*
     .hex{
       overflow-x: auto;
       background-color: #eeeeee;
@@ -222,8 +289,11 @@ export default
       tr:nth-child(1){
         border-color:  #bbbbbb;;
       }
-    } 
+    } */
   }
+}
+.status_fixed{
+  background-color: #eeeeee;
 }
 .login {
   display: flex;

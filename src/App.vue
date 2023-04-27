@@ -5,13 +5,16 @@
     @login-complete="onLoginComplete"
   /> -->
   <button @click="onStartApplication(16000)">OPEN WEB</button>
+  <App_Debug  />
   <TimeLine v-if="state=='timeline'" :tbsk="tbsk" :params="sock_params"  />
-
+  <ModalTransmit></ModalTransmit>
 </template>
 
 <script>
 //import LoginForm from './components/LoginForm.vue'
 import TimeLine from './components/TimeLine.vue'
+import ModalTransmit from './components/ModalTransmit.vue'
+import App_Debug from './App_Debug.vue'
 
 import {TBSKmodemJS} from "tbskmodem-js"
 
@@ -19,7 +22,9 @@ export default {
   name: 'App',
   components: {
 //    LoginForm,
-    TimeLine
+    TimeLine,
+    App_Debug,
+    ModalTransmit
   },
   data() {
     return {
@@ -33,6 +38,9 @@ export default {
     }
   },  
   methods: {
+    debug(msg){
+      console.log(msg);
+    },
     onStartApplication(freq){
       const _t=this;
       function init(){
