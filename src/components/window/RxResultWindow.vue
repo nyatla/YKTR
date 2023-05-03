@@ -8,20 +8,35 @@
         <div>{{ formattedTime }}</div>
       </div>
       <div class="info">
-        <div>{{ rawdata.length }} byte</div>
-        <AdaptiveRightScrollDiv :text="rawdata"></AdaptiveRightScrollDiv>
+        <div>{{ info.line1 }}</div>
+        <div>{{ rawdata.length }} bytes received.</div>
       </div>
     </div>
-    <div class="sub">
+    <hr />
+    <div class="main">
+      <ul class="tabs">
+        <li v-on:click="changeTab('text')" v-bind:class="{ 'active': active_tab === 'text' }">TEXT</li>
+        <li v-on:click="changeTab('hex')" v-bind:class="{ 'active': active_tab === 'hex' }">HEX</li>
+      </ul>
+      <ul class="contents">
+        <li v-if="active_tab === 'text'">
+          <TextView :rawdata="rawdata"></TextView>
+        </li>
+        <li v-else-if="active_tab === 'hex'">
+          <HexView :rawdata="rawdata"></HexView>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <button>close</button>
     </div>
   </div>
 </template>
 
 <script>
 
-import TextView from './view/TextView.vue';
-import HexView from './view/HexView.vue';
-import AdaptiveRightScrollDiv from './ctrl/AdaptiveRightScrollDiv.vue';
+import TextView from '../view/TextView.vue';
+import HexView from '../view/HexView.vue';
 
 
 
@@ -31,7 +46,6 @@ export default
     components: {
       TextView,
       HexView,
-      AdaptiveRightScrollDiv,
     },    
     props: {
       rawdata: Array,
@@ -49,6 +63,9 @@ export default
       }
     },
     methods: {
+      changeTab: function(num){
+        this.active_tab = num
+      }     
     },
     computed: {
       formattedDate() {
@@ -57,12 +74,13 @@ export default
       formattedTime() {
         return this.datetime.toLocaleTimeString(navigator.language, { hour12: false ,hour: 'numeric', minute: '2-digit'});
       }
+
     }
   }
 </script>
 
 <style lang="less" scoped>
-@import "../assets/global.less";
+@import "@/assets/global.less";
 
 
 .rxdatainfo {
@@ -72,7 +90,6 @@ export default
 
   .top {
     display: flex;
-    overflow: hidden;
     >.label {
       border: black 1px solid;
       height: 2rem;
@@ -85,7 +102,7 @@ export default
     >.x_type {
       .label;
       width: 2rem;
-      min-width: 2rem;
+      min-width: 2rem;      
       background-color: @RX_LABEL_BG;
       color: @RX_LABEL_TXT;
     }
@@ -94,7 +111,7 @@ export default
       margin-left: 0.25rem;
       .label;
       width: 4rem;
-      min-width: 4rem;
+      min-width: 4rem;      
     }
 
     >.datetime {
@@ -118,24 +135,71 @@ export default
     }
 
     >.info {
-      width: 100%;
       margin-left: auto;
       margin-right: 0;
       text-align: right;
-      // overflow: hidden;
 
       >:nth-child(1) {
         font-size: 0.5rem;
       }
 
       >:nth-child(2) {
-        font-size: 1.3rem;
-        width: 100%;
         margin-top: 0.0rem;
-        overflow-x: hidden;
-
+        font-size: 1.3rem;
       }
     }
+  }
+
+  >hr {
+    height: 1px;
+    background-color: black;
+    border: none;
+  }
+  .main{
+    ul{
+      margin: 0;
+      padding: 0;
+    }
+    li{
+      list-style: none;
+    }
+    .tabs {
+      overflow: hidden;
+    }
+    .tabs li,.tabs label {
+      display: flex;
+      align-items: center;
+      justify-content: center;      
+      float: left;
+      width: 4rem;
+      height: 1rem;
+      padding: .1rem;
+      cursor: pointer;
+      transition: .2s;
+      font-size:0.5rem;
+    }
+    .tabs li:not(:first-child),.tabs label:not(:first-of-type) {
+      border-left: none;
+    }
+    .tabs li.active,.tabs :checked + label {
+      font-size:0.8rem;
+      font-weight: bold;
+      cursor: auto;
+      background-color:@yellow;
+    }
+    .contents{
+      overflow: hidden;
+      margin:0.25em 0;
+    }
+
+  }
+
+  .contents {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;    
+
+    
   }
 }
 </style>
