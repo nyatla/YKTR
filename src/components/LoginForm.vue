@@ -15,12 +15,12 @@
             <div class="sub">
               <label>Frquency</label>
               <div class="subselect">
-                <TileSelect :items="freqs" :defaultSelectedIndex="freqs_select"></TileSelect>
+                <TileSelect :name="'freqs_select'" :items="freqs" :defaultSelectedIndex="freqs_select" @selected="OnChangeModulationParam"></TileSelect>
               </div>
               <label>Tone</label>
               <div>
                 <div class="subselect">
-                  <TileSelect :items="tones" :defaultSelectedIndex="tones_select" @selected-event="OnToneSelect">
+                  <TileSelect :name="'tones_select'" :items="tones" :defaultSelectedIndex="tones_select" @selected="OnChangeModulationParam">
                   </TileSelect>
                 </div>
                 <div class="tone_params">
@@ -32,11 +32,11 @@
                     </tr>
                     <tr>
                       <td>
-                        <IntegerInput :max="1000" :min="10" :initValue="tones[0][1]['points']"></IntegerInput>
+                        <IntegerInput :name="'tone_params_sin_points'" :max="1000" :min="10" :initValue="tones[0][1]['points']" @change="OnChangeModulationParam"></IntegerInput>
                       </td>
                       <td>x</td>
                       <td>
-                        <IntegerInput :max="100" :min="1" :initValue="tones[0][1]['cycle']"></IntegerInput>
+                        <IntegerInput :name="'tone_params_sin_cycle'" :max="100" :min="1" :initValue="tones[0][1]['cycle']" @change="OnChangeModulationParam"></IntegerInput>
                       </td>
                     </tr>
                   </table>
@@ -49,14 +49,14 @@
                     </tr>
                     <tr>
                       <td>
-                        <IntegerInput :max="1000" :min="10" :initValue="tones[1][1]['points']"></IntegerInput>
+                        <IntegerInput :name="'tone_params_xpsk_points'" :max="1000" :min="10" :initValue="tones[1][1]['points']" @change="OnChangeModulationParam"></IntegerInput>
                       </td>
                       <td>x</td>
                       <td>
-                        <IntegerInput :max="100" :min="1" :initValue="tones[1][1]['cycle']"></IntegerInput>
+                        <IntegerInput :name="'tone_params_xpsk_cycle'" :max="100" :min="1" :initValue="tones[1][1]['cycle']" @change="OnChangeModulationParam"></IntegerInput>
                       </td>
                       <td>
-                        <IntegerInput :max="32" :min="1" :initValue="tones[1][1]['div']"></IntegerInput>
+                        <IntegerInput :name="'tone_params_xpsk_div'" :max="32" :min="1" :initValue="tones[1][1]['div']" @change="OnChangeModulationParam"></IntegerInput>
                       </td>
                     </tr>
                   </table>
@@ -68,7 +68,6 @@
         </div>
       </li>
     </ul>
-
     <button class="go" @click="this.$emit('onStartApplication', selectedFreq)">Go!</button>
   </div>
 </template>
@@ -85,52 +84,78 @@ export default {
   props: {
     default_freqs: {
       type: Object,
-      default: [
-        ['8kHz', { freq: 8000 }],
-        ['16kHz', { freq: 16000 }],
-        ['24kHz', { freq: 24000 }],
-        ['48kHz', { freq: 48000 }]
-      ]
+      default: {
+        freqs:[
+          ['8kHz', { freq: 8000 }],
+          ['16kHz', { freq: 16000 }],
+          ['24kHz', { freq: 24000 }],
+          ['24kHz', { freq: 32000 }],
+          ['48kHz', { freq: 48000 }]
+        ],
+        selected:0
+      }
     },
     default_tone: {
       type: Object,
-      default: [
-        ['SIN', { points: 100, cycle: 1 }],
-        ['XPSK', { points: 100, cycle: 1, div: 8 }],
-      ]
+      default: {
+        tones:[
+          ['SIN', { points: 100, cycle: 1 }],
+          ['XPSK', { points: 100, cycle: 1, div: 8 }],
+        ],
+        selected:0
+      }
     }
   },
   data() {
     return {
       show_mod_setting: true,
-      freqs: this.default_freqs,
-      freqs_select: 0,
-      tones: this.default_tone,
-      tones_select: 0,
+      freqs: this.default_freqs.freqs,
+      freqs_select: this.default_freqs.selected,
+      tones: this.default_tone.tones,
+      tones_select: this.default_tone.selected,
       fadeout: false,
     }
   },
   methods: {
-
     freqSelected() {
       return this.freqs[this.freqs_select];
     },
-    // toneSelected() {
-    //   return this.tone[this.tones_select];
-    // },
-    OnToneSelect(m) {
-      this.tones_select = m.index;
+    OnChangeModulationParam(event){
+      console.log("OnEvent",event);
+      switch(event.name){
+      case "freqs_select":
+        this.freqs_select=event.index;
+        break;
+      case "tones_select":
+        this.tones_select=event.index;
+        break;
+      case "tone_params_sin_points":
+        console.log("NEEW");
+        this.tones[0][1]['points']=event.value;
+        break;
+      case "tone_params_sin_cycle":
+        this.tones[0][1]['cycle']=event.value;
+        break;
+      case "tone_params_xpsk_points":
+        this.tones[1][1]['points']=event.value;
+        break;
+      case "tone_params_xpsk_cycle":
+        this.tones[1][1]['cycle']=event.value;
+        break;
+      case "tone_params_xpsk_div":
+        this.tones[1][1]['div']=event.value;
+        break;        
+      }
     },
-
     login() {
     }
   },
   computed:{
     summary(){
-      console.log("SUMMARY");
       let freq= this.freqs[this.freqs_select];
       let tone= this.tones[this.tones_select];
       let ticks=tone[1].points*tone[1].cycle;
+      console.log("SUMMARY",freq,tone,ticks);
       return `TBSK ${freq[1].freq}Hz ${ticks}Ticks ${tone[0]} Tone`;
     },    
 

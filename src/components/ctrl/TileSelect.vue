@@ -9,8 +9,11 @@
 <script>
 
 export default {
-
     props: {
+        name:{
+            type:String,
+            default:"TileSelect"
+        },
         items:Array,// ["a","b","c","d"] or [["name",{value:v}]]
         defaultSelectedIndex:{
             type:Number,
@@ -36,7 +39,12 @@ export default {
             }
         },
         selectedIndex:function(newVal){
-            this.$emit('selected-event', {index:newVal,title:this.titles[newVal],value:this.items[newVal]});
+            this.$emit('selected', {
+                name:this.name,
+                index:newVal,
+                title:this.titles[newVal],
+                value:this.items[newVal]
+            });
         }
     },
     methods: {
