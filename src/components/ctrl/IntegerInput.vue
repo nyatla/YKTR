@@ -25,7 +25,7 @@
     watch: {
       value(newValue) {
         if(this._is_valid){
-          this.$emit('change',{name:this.name,value:newValue});
+          this.$emit('event-change',{name:this.name,value:newValue});
         }
       }
     },    

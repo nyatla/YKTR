@@ -1,61 +1,77 @@
 <template>
   <div class="dashboard">
-    <Transition name="fade">
-      <div v-if="tttest">
-        WAIT FOR SIGNAL
-      </div>
-    </Transition>
-
-    <div>{{ info.frequency }} Hz - {{info.ticks}} Ticks</div>
+    <div>{{ setting.frequency[1]["freq"] }} Hz - {{ticks}} Ticks</div>
     <div>
-      <progress id="rms" max="100" value="70"> 70% </progress>
+      <progress class="rms" max="1000" :value="rms"> </progress>
     </div>
-    <div>{{ time.toLocaleString() }}</div>
+    <div>{{ activity_time_text }}</div>
     <div>
-      <div>DEBUG LAND</div>
-      <button @click="this.$emit('debug','detect')">detect</button>
-      <button @click="this.$emit('debug','message',0)">MESSAGE</button>
-      <button @click="this.$emit('debug','lost')">LOST</button>
     </div>
 <!--    <div>RX:{{ statistics.rx }} TX:{{ statistics.tx }}</div>-->
   </div>
 </template>
 
 <script>
+import {DEFAULT_SETTING} from "../assets/classes"
+
+
+
+
 export default
 {
   props: {
-    info: {
-      ticks:Number,
-      frequency:Number
+    setting:{
+      type:Object,
+      default:DEFAULT_SETTING
+    },
+    activity_time_text:{
+      type:String,
+      default:"",
     },
   },
   data() {
     return {
-      tttest:false,
-      minimize:false,
       rms:0,
-      time:new Date(),
-      statistics:{
-        rx:0,
-        tx:0
-      }
     }
   },
   methods: {
-    // setRms(v) {
-
-    // },
+    setRms(v) {
+      if(v===0){
+        this.rms=0;
+      }else{
+        let db=(Math.log10(v));//16bit幅の値と仮定して計算
+        const progress = (db + 2.5)/2.5; // 0～8で計算
+        this.rms=(progress < 0 ? 0 : (progress>1?1:progress))*1000; // 負の場合は0にクリップ        
+      }
+    },
     toggle() {
       this.minimize=!this.minimize;
-    }    
+    }
   },
   computed: {
+    ticks(){
+      let p=this.setting.tone[1];
+      return p["points"]*p["cycle"];
+    }
   }
 }
 </script>
 
 <style lang="less" scoped>
+  .dashboard{
+    background-color: #bbbbff;
+    padding:0.25rem;
+    >:nth-child(1){
+      font-size: 1.3em;
+//      font-weight: bold;
+      margin:auto .2em;
+
+    }
+  }
+
+  .rms{
+      width:80%;
+  }
   .fade-enter-active, .fade-leave-active {
     transition: opacity 1s;
   }
@@ -69,15 +85,6 @@ export default
   }
 
 
-  .dashboard{
-    background-color: #bbbbff;
-    >:nth-child(1){
-      font-size: 1.5em;
-      font-weight: bold;
-      margin:auto .2em;
-
-    }
-  }
 
 
 </style>

@@ -7,44 +7,44 @@
 </template>
 
 <script>
-import { TBSKmodemJS } from "tbskmodem-js"
-class BrokenCodeText{
-  constructor(){
-    this._dec=new TBSKmodemJS.utils.BrokenTextStreamDecoder();
-    this._contents=[];
-  }
-  get fixed(){
-    return this._contents;
-  }
-  get unfixed(){
-    return this._dec.pending;
-  }
-  update(n){
-    let dec = this._dec; //デコーダー取得
-    let contents = this._contents;
-    for (let i of n) {
-      let darray = dec.update(i);
-      if (darray == null) {
-        continue;
-      }
-      for (let j = 0; j < darray.length; j++) {
-        if ((typeof darray[j]) == 'string') {
-          let cv = darray[j].charCodeAt();
-          if (cv >= 256 || (cv >= 32 && cv != 127)) {
-            if (contents.length == 0 || (typeof contents[contents.length - 1]) != 'string') {
-              contents.push("");//新しい文字列ブロック
-            }
-            contents[contents.length - 1] += darray[j];//文字列
-          } else {
-            contents.push(cv);//16進数
-          }
-        } else {
-          contents.push(darray[j]);//16進数
-        }
-      }
-    }
-  }
-}
+import {BrokenCodeText,toHex} from "../../assets/classes"
+// class BrokenCodeText{
+//   constructor(){
+//     this._dec=new TBSKmodemJS.utils.BrokenTextStreamDecoder();
+//     this._contents=[];
+//   }
+//   get fixed(){
+//     return this._contents;
+//   }
+//   get unfixed(){
+//     return this._dec.pending;
+//   }
+//   update(n){
+//     let dec = this._dec; //デコーダー取得
+//     let contents = this._contents;
+//     for (let i of n) {
+//       let darray = dec.update(i);
+//       if (darray == null) {
+//         continue;
+//       }
+//       for (let j = 0; j < darray.length; j++) {
+//         if ((typeof darray[j]) == 'string') {
+//           let cv = darray[j].charCodeAt();
+//           if (cv >= 256 || (cv >= 32 && cv != 127)) {
+//             if (contents.length == 0 || (typeof contents[contents.length - 1]) != 'string') {
+//               contents.push("");//新しい文字列ブロック
+//             }
+//             contents[contents.length - 1] += darray[j];//文字列
+//           } else {
+//             contents.push(cv);//16進数
+//           }
+//         } else {
+//           contents.push(darray[j]);//16進数
+//         }
+//       }
+//     }
+//   }
+// }
 
 
 export default
@@ -76,13 +76,13 @@ export default
       }
     },
     methods: {
-      toHex(value, d) {
-        let r = value.toString(16);
-        while (r.length < d) {
-          r = '0' + r;
-        }
-        return r;
-      },  
+      // toHex(value, d) {
+      //   let r = value.toString(16);
+      //   while (r.length < d) {
+      //     r = '0' + r;
+      //   }
+      //   return r;
+      // },  
     },
     computed: {
       fixedText() {

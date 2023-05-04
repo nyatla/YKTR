@@ -9,7 +9,7 @@
       </div>
       <div class="info">
         <div>{{ rawdata.length }} byte</div>
-        <AdaptiveRightScrollDiv :text="rawdata"></AdaptiveRightScrollDiv>
+        <AdaptiveRightScrollDiv :text="fixed"></AdaptiveRightScrollDiv>
       </div>
     </div>
     <div class="sub">
@@ -18,6 +18,7 @@
 </template>
 
 <script>
+import {BrokenCodeText} from '../assets/classes';
 
 import TextView from './view/TextView.vue';
 import HexView from './view/HexView.vue';
@@ -32,19 +33,40 @@ export default
       TextView,
       HexView,
       AdaptiveRightScrollDiv,
-    },    
+    },
     props: {
       rawdata: Array,
-      datetime:Object,
+      datetime:{
+        type:Object,
+        default:undefined
+      },
       info:{
         line1:String,
         line2:String,
       }
     },
+    watch:{
+      rawdata:{
+        handler(new_,old_) {
+          if(old_===undefined || new_.length<=old_.length){
+            this._dec=new BrokenCodeText();
+            this._dec.update(new_);
+          }else{
+            this._dec.update(new_.slice(old_.length));
+          }
+          this.fixed=this._dec.fixed;
+          this.unfixed=this._dec.unfixed;
+        },
+        immediate:true,
+        deep:true//暫定実装。パフォーマンスに影響があるのででっかい配列の場合は処理を切り替えて
+      }
+    },
     data() {
       return {
-        active_tab:"text",
+        _dec:undefined,
         date: new Date(),
+        fixed:"",
+        unfixed:[],
         closed: false
       }
     },

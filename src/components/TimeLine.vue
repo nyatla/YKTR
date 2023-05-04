@@ -1,12 +1,10 @@
 <template>
   <div class="timeline" v-if="!closed">
-    <h1>{{ title }}</h1>
-    <hr />
     <!-- <RawDataStatus class="status" v-for="(status, index) in items"  :init_type="status.init_type" :key="index" ref="items"></RawDataStatus> -->
-    <StatusDashboard :info="{ frequency: 99, ticks: 100 }" @debug="debug"></StatusDashboard>
+    <StatusDashboard ref="dashboardRef" :activity_time_text="activity_time_text" @debug="debug"></StatusDashboard>
     <ul class="status-ul">
         <li v-for="(status, index) in statuses" :key="index">
-            <RxStatus v-if="status.type == 'rx'" :rawdata="status.rawdata" :fixed="status.fixed"></RxStatus>
+            <RxStatus v-if="status.type == 'rx'" :datetime="status.datetime" :rawdata="status.rawdata" :fixed="status.fixed"></RxStatus>
         </li>
     </ul>
   </div>
@@ -16,8 +14,64 @@
 
   
 <script>
+import {DEFAULT_SETTING} from "../assets/classes"
 import RxStatus from './RxStatus.vue';
 import StatusDashboard from './StatusDashboard.vue';
+
+
+class Stopwatch {
+  constructor() {
+    this.startTime = null;
+    this.stopTime = null;
+    this.running = false;
+  }
+
+  start() {
+    if (!this.running) {
+      this.startTime = Date.now();
+      this.running = true;
+    }
+  }
+
+  stop() {
+    if (this.running) {
+      this.stopTime = Date.now();
+      this.running = false;
+    }
+  }
+
+  getElapsedTime() {
+    if (this.startTime === null) {
+      return 0;
+    }
+    if (this.running) {
+      return Date.now() - this.startTime;
+    } else {
+      return this.stopTime - this.startTime;
+    }
+  }
+  get hhmmssText(){
+    if (this.startTime === null) {
+      throw new Error();
+    }
+    const elapsed = this.running ? Date.now() - this.startTime : this.stopTime - this.startTime;
+    const hours = Math.floor(elapsed / 3600000); // 1時間は 3600000 ミリ秒
+    const minutes = Math.floor((elapsed - hours * 3600000) / 60000); // 1分は 60000 ミリ秒
+    const seconds = Math.floor((elapsed - hours * 3600000 - minutes * 60000) / 1000); // 1秒は 1000 ミリ秒
+    const pad = (num) => String(num).padStart(2, '0'); // 数字を2桁の文字列に変換する関数
+    return `${hours>99?hours:pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  }
+
+  reset() {
+    this.startTime = null;
+    this.stopTime = null;
+    this.running = false;
+  }
+}
+
+
+
+
 
 let DBG_DATA = [56, 58, 57, 2, 0x88, 88, 5, 8, 0xe3, 0x81, 0x82, 56, 56, 56, 56, 56, 56, 56, 66, 24, 58, 56];
 let dbg_c = 0;
@@ -30,15 +84,20 @@ export default {
     StatusDashboard
   },
   props: {
+    setting:{
+      type:Object,
+      default:DEFAULT_SETTING
+    },
     tbsk: Object,//TBSKmodemJSインスタンス
-    params: {
-      frequency: Number, //初期化パラメータ
-      tone: Object
-    }
   },
+
 
   data() {
     return {
+      _rms:0,
+      _stopwatch:undefined,
+      _timer:undefined,
+      activity_time_text:"",
       title: "TBSK Audio Terminal",
       statuses: [
         // {
@@ -52,11 +111,28 @@ export default {
       closed: false
     }
   },
-  created() {
+  async mounted()
+  {
     let _t = this;
-    console.log("NOT IMPLEMENTED! TONE!");
-    console.log("Create socket with params", this.params);
-    let socket = new this.tbsk.misc.TbskSocket({ carrier: this.params.frequency, encoding: "bin" });
+    const tbsk=this.tbsk;
+    const setting=this.setting;
+    let tone;
+    switch(setting.tone[0]){
+    case 'SIN':
+      tone=new tbsk.SinTone(setting.tone[1].points,setting.tone[1].cycle);
+      break;
+    case 'XPSK':
+      tone=new tbsk.SinTone(setting.tone[1].points,setting.tone[1].cycle,setting.tone[1].div);
+      break;
+    default:
+      throw new Error("Invalid tone",tone);
+    }
+    let socket = new this.tbsk.misc.TbskSocket({
+      carrier: setting.frequency[1]["freq"],
+      tone:tone,
+      encoding: "bin" 
+    });
+    tone.dispose();//参照をコピーされるからもういらない。
     socket.addEventListener("open", () => {
       console.log("Socket open!\n");
     });
@@ -66,7 +142,21 @@ export default {
     // socket.addEventListener("sendstart",(event)=>{console.log("TX:("+event.id+")");});
     // socket.addEventListener("sendcompleted",(event)=>{console.log("done\n");});
     //socket.addEventListener("close",(event)=>{console.log("closed!\n");});
+    await socket.waitOpenAS();
+    let stopwatch=new Stopwatch();
+    stopwatch.start();
+    this._timer=setInterval(()=>{
+      _t.activity_time_text=stopwatch.hhmmssText;
+      _t.$refs.dashboardRef.setRms(socket.rms);
+    },30);
+    this._stopwatch=stopwatch;
     this._socket = socket;
+  },
+  beforeUnmount(){
+    clearInterval(this._timer);
+  },  
+  created() {
+
   },
   beforeUnmount() {
     this._socket.close();
@@ -99,6 +189,7 @@ export default {
       this.statuses.push(
         {
           sid: this.current_sid,
+          datetime:new Date(),
           type: "rx",
           rawdata: [],
           fixed: false,

@@ -8,7 +8,9 @@
     <hr/>
     <div>
     </div>
+    <StatusDashBoard v-if="true"></StatusDashBoard>
     <LoginForm></LoginForm>
+
     <TxStatus
       :datetime="new Date()"
       :info="{'line1':'TBSK/16kHz/100TICKS','line2':''}"
@@ -34,7 +36,7 @@
 import LoginForm from './components/LoginForm.vue'
 
 import ModalTransmit from './components/ModalTransmit.vue'
-
+import StatusDashBoard from './components/StatusDashboard.vue'
 import TxStatus from './components/TxStatus.vue'
 import RxStatus from './components/RxStatus.vue'
 
@@ -43,6 +45,7 @@ import TxInputWindow from './components/window/TxInputWindow.vue'
 export default
 {
   components: {
+    StatusDashBoard,
     LoginForm,
     ModalTransmit,
     TxStatus,

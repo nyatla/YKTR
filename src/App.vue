@@ -4,62 +4,50 @@
     msg="Welcome to Your Vue.js App"
     @login-complete="onLoginComplete"
   /> -->
-  <button @click="onStartApplication(16000)">OPEN WEB</button>
-  <App_Debug  />
-  <TimeLine v-if="state=='timeline'" :tbsk="tbsk" :params="sock_params"  />
+  <App_Debug v-if="false"/>
+  <TimeLine v-if="state=='rawpacket'" :setting="setting" :tbsk="tbsk"  />
+  <LoginForm v-if="state=='login'" @event-go="OnGo"></LoginForm>
+
 
 </template>
 
 <script>
-//import LoginForm from './components/LoginForm.vue'
+import LoginForm from './components/LoginForm.vue'
 import TimeLine from './components/TimeLine.vue'
 
-import App_Debug from './App_Debug.vue'
 
+
+import {assert,DEFAULT_SETTING} from './assets/classes'
+import App_Debug from './App_Debug.vue'
 import {TBSKmodemJS} from "tbskmodem-js"
 
 export default {
   name: 'App',
   components: {
-//    LoginForm,
+    LoginForm,
     TimeLine,
     App_Debug,
 
   },
+
   data() {
     return {
       tbsk:undefined,
-      sock_params:{
-        frequency:16000,
-        tone:undefined
-      },
+      setting:DEFAULT_SETTING,
       state:"login",
-
     }
   },  
   methods: {
-    debug(msg){
-      console.log(msg);
+    async OnGo(v){
+      console.log(v);
+      assert(this.state=="login");
+      this.state="wait_for_login";
+      let tbsk=await TBSKmodemJS.load();
+      console.log(tbsk.version);
+      this.tbsk=tbsk;
+      this.state="rawpacket";
+      console.log(this.state);
     },
-    onStartApplication(freq){
-      const _t=this;
-      function init(){
-        _t.state="timeline";
-      }
-      if(_t.tbsk===undefined){
-        console.log(TBSKmodemJS);
-        TBSKmodemJS.load().then((tbsk)=>{
-          console.log(tbsk.version);
-          _t.tbsk=tbsk;
-          _t.sock_params={
-            frequency:freq,
-            tone:undefined};
-          init();
-        });
-      }else{
-        init();
-      }
-    }
   }  
 }
 </script>

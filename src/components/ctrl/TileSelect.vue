@@ -39,7 +39,7 @@ export default {
             }
         },
         selectedIndex:function(newVal){
-            this.$emit('selected', {
+            this.$emit('event-selected', {
                 name:this.name,
                 index:newVal,
                 title:this.titles[newVal],
