@@ -1,5 +1,5 @@
 <template>
-  <div class="rxdatainfo">
+  <div class="rxdatainfo" @click="handleClick">
     <div class="top">
       <div class="x_type">RX</div>
       <div class="d_type">DATA</div>
@@ -9,7 +9,12 @@
       </div>
       <div class="info">
         <div>{{ rawdata.length }} byte</div>
-        <AdaptiveRightScrollDiv :text="fixed"></AdaptiveRightScrollDiv>
+        <AdaptiveRightScrollDiv>
+          <template v-slot:contents>
+            <span v-for="(c, i) in fixed" v-bind:key="i" :class="{ 'hexascii': (typeof c) != 'string' }">{{ ((typeof c) == 'string') ? c : toHex(c, 2) }}</span>
+          <span class="unfixed" v-for="(c, i) in unfixed" v-bind:key="i">{{ toHex(c, 2) }}</span>            
+          </template>
+        </AdaptiveRightScrollDiv>
       </div>
     </div>
     <div class="sub">
@@ -18,7 +23,7 @@
 </template>
 
 <script>
-import {BrokenCodeText} from '../assets/classes';
+import {BrokenCodeText,toHex} from '../assets/classes';
 
 import TextView from './view/TextView.vue';
 import HexView from './view/HexView.vue';
@@ -38,7 +43,7 @@ export default
       rawdata: Array,
       datetime:{
         type:Object,
-        default:undefined
+        default:new Date()
       },
       info:{
         line1:String,
@@ -71,6 +76,7 @@ export default
       }
     },
     methods: {
+      toHex:toHex
     },
     computed: {
       formattedDate() {
@@ -89,6 +95,7 @@ export default
 
 .rxdatainfo {
   background-color: @RX_BG;
+  cursor:pointer;
 
   padding: .25rem;
 
@@ -156,6 +163,16 @@ export default
         margin-top: 0.0rem;
         overflow-x: hidden;
 
+      }
+      .unfixed{
+        display: inline-block;
+        text-align: center;
+        color:red;
+        border: none;
+        background-color: @light-gray;
+        width:1.2rem;
+        margin: 0 0.1rem;
+        font-size: 0.8rem;
       }
     }
   }

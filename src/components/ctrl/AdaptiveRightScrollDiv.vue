@@ -3,17 +3,19 @@
 <template>
     <div class="marquee" ref="marquee">
         <!-- <div class="text" :style="{ width: textWidth + 'px', transform: 'translateX(' + offset + 'px)' }">{{ text }}</div> -->
-        <div class="text" ref="text" :style="{transform: 'translateX(' + offset + 'px)' }">{{ text }}</div>
+        <div class="text" ref="text" :style="{transform: 'translateX(' + offset + 'px)' }">
+            <slot name="contents"></slot>
+        </div>
     </div>
 </template>
   
 <script>
 export default {
     props: {
-        text: {
-            type: String,
-            default: ''
-        },
+        // text: {
+        //     type: String,
+        //     default: ''
+        // },
         speed:{
             type: Number,
             default: 1
@@ -26,9 +28,9 @@ export default {
         }
     },
     watch: {
-        text: function (v) {
-            this.updateTextWidth()
-        }
+        // '$slots.foo': function (v) {
+        //     this.updateTextWidth()
+        // }
     },
     mounted() {
         this.$nextTick(() => {

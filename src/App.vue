@@ -5,8 +5,18 @@
     @login-complete="onLoginComplete"
   /> -->
   <App_Debug v-if="false"/>
-  <TimeLine v-if="state=='rawpacket'" :setting="setting" :tbsk="tbsk"  />
-  <LoginForm v-if="state=='login'" @event-go="OnGo"></LoginForm>
+  <div class="vcenter" v-if="state=='login'" >
+    <div>
+      <LoginForm @event-go="OnGo"></LoginForm>
+    </div>
+  </div>
+  <div class="vfullscreen" v-if="state=='rawpacket'" >
+    <div>
+      <TimeLine  :setting="setting" :tbsk="tbsk"  />
+    </div>
+  </div>
+
+
 
 
 </template>
@@ -38,9 +48,10 @@ export default {
     }
   },  
   methods: {
-    async OnGo(v){
-      console.log(v);
+    async OnGo(event){
+      console.log(event);
       assert(this.state=="login");
+      this.setting=event.setting;
       this.state="wait_for_login";
       let tbsk=await TBSKmodemJS.load();
       console.log(tbsk.version);
@@ -52,7 +63,39 @@ export default {
 }
 </script>
 
-<style>
+<style lang="less">
+.area{
+  padding:0 2.5vw;
+  height: 100vh;
+  // min-width:20rem;
+  // max-width:40rem;
+}
+.vcenter{
+  .area;
+  display: flex;
+  justify-content: center; /* 横方向（X軸）の中央揃え */
+  align-items: center; /* 縦方向（Y軸）の中央揃え */
+  >:nth-child(1){
+    width:95vw;
+    min-width:20rem;
+    max-width:40rem;
+  }
+}
+.vfullscreen{
+  .area;
+  display: flex;
+  justify-content: center; /* 横方向（X軸）の中央揃え */
+  >:nth-child(1){
+    width:95vw;
+    min-width:20rem;
+    max-width:40rem;
+  }
+}
+
+html,body{
+  height:100%;
+  margin: 0;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

@@ -1,12 +1,23 @@
 <template>
   <div class="timeline" v-if="!closed">
-    <!-- <RawDataStatus class="status" v-for="(status, index) in items"  :init_type="status.init_type" :key="index" ref="items"></RawDataStatus> -->
-    <StatusDashboard ref="dashboardRef" :activity_time_text="activity_time_text" @debug="debug"></StatusDashboard>
+    <div class="top_panel">
+      <StatusDashboard ref="dashboardRef" :setting="setting" :activity_time_text="activity_time_text" @debug="debug"></StatusDashboard>
+    </div>
     <ul class="status-ul">
         <li v-for="(status, index) in statuses" :key="index">
             <RxStatus v-if="status.type == 'rx'" :datetime="status.datetime" :rawdata="status.rawdata" :fixed="status.fixed"></RxStatus>
         </li>
+        <li v-for="index in 20">
+          <RxStatus  :rawdata="[55,56,57]" :fixed="false"></RxStatus>
+        </li>
+
     </ul>
+    <div class="footer_shadow"></div>
+    <div class="footer_panel">
+      <button>Back</button>
+      <button>Transmit</button>
+    </div>
+
   </div>
 </template>
 
@@ -179,7 +190,7 @@ export default {
     },
     close() {
       this._socket.close();
-    },
+    },    
     // eslint-disable-next-line no-unused-vars
     detected(event)
     {
@@ -226,24 +237,60 @@ export default {
 </script>
   
 <style lang="less" scoped>
+  @import "../assets/global.less";
 
-h1 {
-  margin: auto 0;
-  padding: auto 0;
+.inherit_app_setting{
+  //ここの設定はApp.vueからコピーして
+  width:95vw;
+  min-width:20rem;
+  max-width:40rem;
+
+}
+.timeline{
 }
 
 .status-ul {
+  z-index: 1;
   list-style: none;
-  margin: 0;
+  margin: 6rem 0 0 0;
   padding: .25rem 0 0 0;
   >li {
     padding-bottom:.25rem;
   }
+//  background-color: @light-gray;
+  height: 100%;
+  min-height: 10rem;
+  padding-bottom: 5rem;
 }
 
-.login {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.top_panel{
+  .inherit_app_setting;
+  z-index: 2;
+  position: fixed;
+  height:6rem;
+  top:0;
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 1) 100%);
 }
+.footer_base{
+  .inherit_app_setting;
+  position: fixed;
+  height:5rem;
+  bottom: 0;
+}
+.footer_shadow{
+  .footer_base;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 1) 100%);
+}
+
+.footer_panel{
+  .footer_base;
+  background-color: transparent;
+
+  >button{
+    font-size: 1.5rem;
+    width:8rem;
+    margin:1rem;
+  }
+}
+
 </style>
