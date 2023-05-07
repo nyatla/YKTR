@@ -9,7 +9,7 @@
       </div>
       <div class="info">
         <div>{{ info.line1 }}</div>
-        <div>{{ rawdata.length }} bytes received.</div>
+        <div>{{ status.rawdata.length }} bytes received.</div>
       </div>
     </div>
     <hr />
@@ -20,20 +20,21 @@
       </ul>
       <ul class="contents">
         <li v-if="active_tab === 'text'">
-          <TextView :rawdata="rawdata"></TextView>
+          <TextView :rawdata="status.rawdata"></TextView>
         </li>
         <li v-else-if="active_tab === 'hex'">
-          <HexView :rawdata="rawdata"></HexView>
+          <HexView :rawdata="status.rawdata"></HexView>
         </li>
       </ul>
     </div>
-    <div>
-      <button>close</button>
+    <div class="footer">
+      <button @click="()=>{$emit('event-close')}">close</button>
     </div>
   </div>
 </template>
 
 <script>
+import {dbg} from '../../assets/classes';
 
 import TextView from '../view/TextView.vue';
 import HexView from '../view/HexView.vue';
@@ -48,11 +49,18 @@ export default
       HexView,
     },    
     props: {
-      rawdata: Array,
-      datetime:Object,
+      status:{
+        type:Object,
+        default:dbg.rxDummyData(),
+      },      
+//      rawdata: Array,
+//      datetime:Object,
       info:{
-        line1:String,
-        line2:String,
+        type:Object,
+        default:{
+          line1:'LINE1',
+          line2:'LINE2'
+        },
       }
     },
     data() {
@@ -69,10 +77,10 @@ export default
     },
     computed: {
       formattedDate() {
-        return this.datetime.toLocaleDateString(navigator.language);
+        return this.status.datetime.toLocaleDateString(navigator.language);
       },
       formattedTime() {
-        return this.datetime.toLocaleTimeString(navigator.language, { hour12: false ,hour: 'numeric', minute: '2-digit'});
+        return this.status.datetime.toLocaleTimeString(navigator.language, { hour12: false ,hour: 'numeric', minute: '2-digit'});
       }
 
     }
@@ -81,12 +89,17 @@ export default
 
 <style lang="less" scoped>
 @import "@/assets/global.less";
+@import "./window.less";
 
 
 .rxdatainfo {
+  .inherit_app_setting;
   background-color: @RX_BG;
-
   padding: .25rem;
+  border: solid black 1px;
+  position: relative;
+  top:25vh;
+  height:16.5rem;
 
   .top {
     display: flex;
@@ -187,19 +200,22 @@ export default
       cursor: auto;
       background-color:@yellow;
     }
-    .contents{
+    .details{
       overflow: hidden;
       margin:0.25em 0;
     }
-
+    .contents {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      >li{
+        height: 10rem;
+      }
+    }
   }
+  .footer{
+    padding:.5rem 0 0 0;
 
-  .contents {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;    
-
-    
   }
 }
 </style>

@@ -1,6 +1,5 @@
 <template>
   <div class="dashboard">
-    <ModalTransmit v-if="modaltransmit" @close-modal-transmit="close"></ModalTransmit>
     <h1>WELCOME TO DEBUG LAND!</h1>
     <hr/>
     <button @click="domodal()">Show Modal!</button>
@@ -35,7 +34,6 @@
 <script>
 import LoginForm from './components/LoginForm.vue'
 
-import ModalTransmit from './components/ModalTransmit.vue'
 import StatusDashBoard from './components/StatusDashboard.vue'
 import TxStatus from './components/TxStatus.vue'
 import RxStatus from './components/RxStatus.vue'
@@ -47,7 +45,6 @@ export default
   components: {
     StatusDashBoard,
     LoginForm,
-    ModalTransmit,
     TxStatus,
     RxStatus,
     RxResultWindow,

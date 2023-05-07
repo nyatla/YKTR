@@ -157,6 +157,9 @@ export default {
       this.$emit('event-go',{
         name:"",
         setting:{
+          preamble:{
+            cycle:4
+          },
           frequency:this.default_setting.frequency.freqs[this.freqs_select],
           tone:this.tones[this.tones_select],
         }

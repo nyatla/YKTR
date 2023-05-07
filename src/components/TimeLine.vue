@@ -5,18 +5,24 @@
     </div>
     <ul class="status-ul">
         <li v-for="(status, index) in statuses" :key="index">
-            <RxStatus v-if="status.type == 'rx'" :datetime="status.datetime" :rawdata="status.rawdata" :fixed="status.fixed"></RxStatus>
+            <RxStatus v-if="status.type == 'rx'" :status="status" @event-click="OnRxClick"></RxStatus>
         </li>
-        <li v-for="index in 20">
-          <RxStatus  :rawdata="[55,56,57]" :fixed="false"></RxStatus>
+        <li v-for="index in 2">
+          <RxStatus  @event-click="OnRxClick"></RxStatus>
         </li>
-
     </ul>
     <div class="footer_shadow"></div>
     <div class="footer_panel">
       <button>Back</button>
-      <button>Transmit</button>
+      <button @click="OnNewTxClick">Transmit</button>
     </div>
+    <ModalFrame v-if="modal=='rx'">
+      <RxResultWindow  :status="current_status" @event-close="OnModalClose"></RxResultWindow>
+    </ModalFrame>
+    <ModalFrame v-if="modal=='newtx'">
+      <TxInputWindow  :setting="setting" @event-close="OnModalClose"></TxInputWindow>
+    </ModalFrame>
+
 
   </div>
 </template>
@@ -25,10 +31,12 @@
 
   
 <script>
-import {DEFAULT_SETTING} from "../assets/classes"
+import {DEFAULT_SETTING,RxStatusData,StatusDataBuilder,dbg} from "../assets/classes"
 import RxStatus from './RxStatus.vue';
 import StatusDashboard from './StatusDashboard.vue';
-
+import RxResultWindow from './window/RxResultWindow.vue';
+import TxInputWindow from './window/TxInputWindow.vue';
+import ModalFrame from './ctrl/ModalFrame.vue';
 
 class Stopwatch {
   constructor() {
@@ -83,7 +91,6 @@ class Stopwatch {
 
 
 
-
 let DBG_DATA = [56, 58, 57, 2, 0x88, 88, 5, 8, 0xe3, 0x81, 0x82, 56, 56, 56, 56, 56, 56, 56, 66, 24, 58, 56];
 let dbg_c = 0;
 function dbgstream() {
@@ -92,9 +99,13 @@ function dbgstream() {
 export default {
   components: {
     RxStatus,
-    StatusDashboard
+    StatusDashboard,
+    RxResultWindow,
+    TxInputWindow,
+    ModalFrame
   },
   props: {
+    
     setting:{
       type:Object,
       default:DEFAULT_SETTING
@@ -105,9 +116,11 @@ export default {
 
   data() {
     return {
+      status_builder:new StatusDataBuilder(),
       _rms:0,
       _stopwatch:undefined,
       _timer:undefined,
+      modal:undefined,
       activity_time_text:"",
       title: "TBSK Audio Terminal",
       statuses: [
@@ -117,7 +130,6 @@ export default {
         //   rawdata:[]
         // }
       ],
-      sid_counter: 0,        //sidの通し番号
       current_sid: undefined,//操作対象のsid
       closed: false
     }
@@ -174,7 +186,22 @@ export default {
     //closeに時間かかるかも。
     return this._socket.waitCloseAS();//Promise
   },
+  computed:{
+    current_status(){
+      return this.statuses[this.current_sid];
+    }
+  },
   methods: {
+    OnRxClick(event){
+      this._current_sid=event.sid;
+      this.modal="rx";
+    },
+    OnNewTxClick(event){
+      this.modal="newtx";
+    },
+    OnModalClose(event){
+      this.modal="";
+    },
     debug(type) {
       console.log(type);
       switch (type) {
@@ -195,16 +222,10 @@ export default {
     detected(event)
     {
       console.log("detected",event.id);
-      this.current_sid = this.sid_counter;
-      this.sid_counter++;
-      this.statuses.push(
-        {
-          sid: this.current_sid,
-          datetime:new Date(),
-          type: "rx",
-          rawdata: [],
-          fixed: false,
-        });
+      let rs=this.status_builder.newRx();
+      this.current_sid = rs.sid;
+      console.log(rs);
+      this.statuses.unshift(rs);
     },
     // eslint-disable-next-line no-unused-vars
     message(event) {

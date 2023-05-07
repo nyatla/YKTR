@@ -23,6 +23,41 @@ const DEFAULT_SETTING={
     tone:['SIN', { points: 100, cycle: 1 }]
 };
 
+
+class RxStatusData{
+    constructor(sid){
+      this.sid=sid;
+      this.type="rx";
+      this.datetime=new Date();
+      this.rawdata=[];
+      this.fixed=false;
+    }
+  }
+  
+class StatusDataBuilder{
+    constructor(){
+        this._sid_counter=0;
+    }
+    newRx(){
+        return new RxStatusData(this._sid_counter++);
+    }
+}
+
+//ダミーデータ生成インスタンス
+class DummyData{
+    constructor(){
+        this._sb=new StatusDataBuilder();
+    }
+    rxDummyData(){
+        let s=this._sb.newRx();
+        s.rawdata.push(52,53,54,55,56);
+        return s;
+    }
+}
+const dbg=new DummyData();
+
+
+
 import { TBSKmodemJS } from "tbskmodem-js"
 class BrokenCodeText{
     constructor(){
@@ -72,6 +107,8 @@ export {
     assert,
     clone,
     toHex,
+    dbg,
+    RxStatusData,StatusDataBuilder,
     BrokenCodeText,
     DEFAULT_SETTING
 }

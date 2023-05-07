@@ -33,7 +33,7 @@
     </div>
     <div>
       <button>send</button>
-      <button>close</button>
+      <button @click="$emit('event-close')">close</button>
     </div>
   </div>
 </template>
@@ -42,6 +42,7 @@
 
 import TextView from '../view/TextView.vue';
 import HexView from '../view/HexView.vue';
+import {DEFAULT_SETTING} from '../../assets/classes';
 
 
 const utf8encoder = new TextEncoder();
@@ -53,6 +54,13 @@ export default
       HexView,
     },    
     props: {
+      setting:{
+        type:Object,
+        default:DEFAULT_SETTING
+      },
+
+
+
       info:{
         type:Object,
         default:{
@@ -116,12 +124,19 @@ export default
 
 <style lang="less" scoped>
 @import "@/assets/global.less";
+@import "./window.less";
+
+
 
 
 .txinputwindow {
+  .inherit_app_setting;  
   background-color: @TX_BG;
-
   padding: .25rem;
+  position: relative;
+
+  top:25vh;
+  height:16.5rem;
 
   .top {
     display: flex;
@@ -141,20 +156,17 @@ export default
       background-color: @TX_LABEL_BG;
       color: @TX_LABEL_TXT;
     }
-
     >.d_type {
       margin-left: 0.25rem;
       .label;
       width: 4rem;
       min-width: 4rem;      
     }
-
     >.datetime {
       margin-left: 0.25rem;
 
       >* {
         width: 5rem;
-
       }
 
       >:nth-child(1) {
@@ -248,9 +260,11 @@ export default
         background-color: @light-gray;
         outline: none;
       }      
-    }
-
-    
+    }    
   }
+  .footer{
+    padding:.5rem 0 0 0;
+
+  }  
 }
 </style>

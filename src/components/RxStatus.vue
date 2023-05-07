@@ -8,7 +8,7 @@
         <div>{{ formattedTime }}</div>
       </div>
       <div class="info">
-        <div>{{ rawdata.length }} byte</div>
+        <div>{{ status.rawdata.length }} byte</div>
         <AdaptiveRightScrollDiv>
           <template v-slot:contents>
             <span v-for="(c, i) in fixed" v-bind:key="i" :class="{ 'hexascii': (typeof c) != 'string' }">{{ ((typeof c) == 'string') ? c : toHex(c, 2) }}</span>
@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import {BrokenCodeText,toHex} from '../assets/classes';
+import {BrokenCodeText,toHex,dbg} from '../assets/classes';
 
 import TextView from './view/TextView.vue';
 import HexView from './view/HexView.vue';
@@ -40,10 +40,9 @@ export default
       AdaptiveRightScrollDiv,
     },
     props: {
-      rawdata: Array,
-      datetime:{
+      status:{
         type:Object,
-        default:new Date()
+        default:dbg.rxDummyData(),
       },
       info:{
         line1:String,
@@ -51,8 +50,9 @@ export default
       }
     },
     watch:{
-      rawdata:{
+      "status.rawdata":{
         handler(new_,old_) {
+          console.log(new_)
           if(old_===undefined || new_.length<=old_.length){
             this._dec=new BrokenCodeText();
             this._dec.update(new_);
@@ -69,21 +69,23 @@ export default
     data() {
       return {
         _dec:undefined,
-        date: new Date(),
-        fixed:"",
         unfixed:[],
-        closed: false
       }
     },
     methods: {
-      toHex:toHex
+      toHex:toHex,
+      handleClick(){
+        //クリックされた通知
+        this.$emit("event-click",{sid:this.status.sid});
+        console.log("emitted");
+      }
     },
     computed: {
       formattedDate() {
-        return this.datetime.toLocaleDateString(navigator.language);
+        return this.status.datetime.toLocaleDateString(navigator.language);
       },
       formattedTime() {
-        return this.datetime.toLocaleTimeString(navigator.language, { hour12: false ,hour: 'numeric', minute: '2-digit'});
+        return this.status.datetime.toLocaleTimeString(navigator.language, { hour12: false ,hour: 'numeric', minute: '2-digit'});
       }
     }
   }
