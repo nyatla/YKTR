@@ -1,9 +1,9 @@
 <template>
-  <div class="textview" v-if="rawdata.length > 0">
-    <span v-for="(c, i) in fixed" v-bind:key="i" :class="{ 'hexascii': (typeof c) != 'string' }">{{ ((typeof c) == 'string') ? c : toHex(c, 2) }}</span>
-    <span class="unfixed" v-for="(c, i) in unfixed" v-bind:key="i">{{ toHex(c, 2) }}</span>
-  </div>
-  <div class="nodata" v-if="rawdata.length == 0">NO DATA</div>
+    <div class="textview" v-if="rawdata.length > 0">
+      <span v-for="(c, i) in fixed" v-bind:key="i" :class="{ 'hexascii': (typeof c) != 'string' }">{{ ((typeof c) == 'string') ? c : toHex(c, 2) }}</span>
+      <span class="unfixed" v-for="(c, i) in unfixed" v-bind:key="i">{{ toHex(c, 2) }}</span>
+    </div>
+    <div class="nodata" v-if="rawdata.length == 0">NO DATA</div>
 </template>
 
 <script>
@@ -39,6 +39,7 @@ export default
       }
     },
     methods: {
+      toHex:toHex,
     },
     computed: {
       fixedText() {
@@ -81,19 +82,23 @@ export default
   margin: 0;
   padding: 0;
 }
-.nodata {
-  padding: .2em;
+.base {
+  box-sizing: border-box;
   background-color: white;
+  width:100%;
+  height: 100%;
+}
+.nodata {
+  .base;
   text-align: center;
 }
 
-
-.textview {
+.textview 
+{
+  .base;
   font-family:monospace;
   padding: .2rem;
-  background-color: white;
   text-align: left;
-  height: 10rem;
   overflow-y: scroll;
 //  word-break: break-all;
   >span{

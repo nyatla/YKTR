@@ -87,8 +87,8 @@ const FREQUENCY_LIST=
 ];
 const TONE_LIST=
 [
-  ['SIN', { points: 100, cycle: 1 }],
-  ['XPSK', { points: 100, cycle: 1, div: 8 }],
+  ['SIN', { points: 10, cycle: 10 }],
+  ['XPSK', { points: 10, cycle: 10, div: 8 }],
 ];
 
 
@@ -183,7 +183,9 @@ export default {
 .main {
   background-color: @LOGIN_BG;
   padding: .25rem;
-
+  position: relative;
+  top:25vh;
+    height:16.5rem;
   >hr {
     height: 1px;
     background-color: black;

@@ -1,6 +1,5 @@
 <template>
   <div class="hex">
-    <div class="nodata" v-if="rawdata.length == 0">NO DATA</div>
     <table v-if="rawdata.length > 0">
       <tr>
         <th></th>
@@ -13,6 +12,7 @@
       </tr>
     </table>
   </div>
+  <div class="nodata" v-if="rawdata.length == 0">NO DATA</div>
 </template>
 
 <script>
@@ -63,6 +63,18 @@ export default
   margin: 0;
   padding: 0;
 }
+
+.base {
+  box-sizing: border-box;
+  background-color: white;
+  width:100%;
+  height: 100%;
+}
+.nodata {
+  .base;
+  text-align: center;
+}
+
 .nodata {
   padding: .2em;
   background-color: white;
@@ -70,8 +82,8 @@ export default
 }
 
 .hex {
+  .base;
   overflow-x: auto;
-  background-color: white;
   // font-size: 0.6em;
 
   table,

@@ -5,14 +5,14 @@
     @login-complete="onLoginComplete"
   /> -->
   <App_Debug v-if="false"/>
-  <div class="vcenter" v-if="state=='login'" >
+  <div class="vfullscreen" v-if="state=='login'" >
     <div>
       <LoginForm @event-go="OnGo"></LoginForm>
     </div>
   </div>
   <div class="vfullscreen" v-if="state=='rawpacket'" >
     <div>
-      <TimeLine  :setting="setting" :tbsk="tbsk"  />
+      <TimeLine  :setting="setting" :tbsk="tbsk" @event-close="handleTimelineClose" />
     </div>
   </div>
 
@@ -53,12 +53,17 @@ export default {
       assert(this.state=="login");
       this.setting=event.setting;
       this.state="wait_for_login";
-      let tbsk=await TBSKmodemJS.load();
-      console.log(tbsk.version);
-      this.tbsk=tbsk;
+      if(this.tbsk===undefined){
+        let tbsk=await TBSKmodemJS.load();
+        console.log(tbsk.version);
+        this.tbsk=tbsk;
+      }
       this.state="rawpacket";
       console.log(this.state);
     },
+    handleTimelineClose(event){
+      this.state="login";
+    }
   }  
 }
 </script>

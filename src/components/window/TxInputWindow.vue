@@ -17,22 +17,22 @@
         <li v-on:click="changeTab('cq+')" v-bind:class="{ 'active': active_tab === 'cq+' }">CQ+</li>
       </ul>
       <ul class="contents">
-        <li class="text" v-if="active_tab === 'text'">
+        <li class="text" v-on:click="changeTab('text')" v-if="active_tab === 'text'">
           <textarea v-model="textdata"></textarea>
         </li>
-        <li class="hex" v-else-if="active_tab === 'hex'">
+        <li class="hex" v-on:click="changeTab('hex')" v-else-if="active_tab === 'hex'">
           <div>not implemented!</div>
         </li>
-        <li class="ax25" v-else-if="active_tab === 'ax25'">
+        <li class="ax25" v-on:click="changeTab('ax25')" v-else-if="active_tab === 'ax25'">
           <div>not implemented!</div>
         </li>
-        <li class="cq+" v-else-if="active_tab === 'cq+'">
+        <li class="cq+" v-on:click="changeTab('cq+')" v-else-if="active_tab === 'cq+'">
           <div>not implemented!</div>
         </li>
       </ul>
     </div>
-    <div>
-      <button>send</button>
+    <div class="footer">
+      <button v-bind:disabled="this.txdata.length==0" @click="clickTransmit">transmit</button>
       <button @click="$emit('event-close')">close</button>
     </div>
   </div>
@@ -58,9 +58,6 @@ export default
         type:Object,
         default:DEFAULT_SETTING
       },
-
-
-
       info:{
         type:Object,
         default:{
@@ -72,14 +69,19 @@ export default
     data() {
       return {
         active_tab:"text",
-        rawdata:[],
         textdata: "",
-        txdata:[],
-        _txdata_delay_tid:null,
+        txdata:[],//送信データ
+        _txdata_delay_tid:null,//送信時間推定のディレイ
       }
     },
     methods: {
-      changeTab: function(num){
+      clickTransmit(){
+        if(this.txdata.length<1){
+          return;
+        }
+        this.$emit("event-transmit",{data:this.txdata});
+      },
+      changeTab(num){
         this.active_tab = num
       }
     },
@@ -100,6 +102,15 @@ export default
       },
     },
     computed: {
+      // txdata()
+      // {
+      //   switch(this.active_tab){
+      //     case 0:
+      //       return this.txdata;
+      //     default:
+      //       throw new Error();
+      //   }
+      // },
       formattedDate() {
         return this.datetime.toLocaleDateString(navigator.language);
       },
@@ -117,7 +128,6 @@ export default
           return sec.toFixed(1);
         }
       }
-
     }
   }
 </script>
@@ -130,13 +140,8 @@ export default
 
 
 .txinputwindow {
-  .inherit_app_setting;  
+  .modalwindow;
   background-color: @TX_BG;
-  padding: .25rem;
-  position: relative;
-
-  top:25vh;
-  height:16.5rem;
 
   .top {
     display: flex;
@@ -196,75 +201,38 @@ export default
       }
     }
   }
-
-  >hr {
-    height: 1px;
-    background-color: black;
-    border: none;
+  .base {
+    box-sizing: border-box;
+    background-color: white;
+    width:100%;
+    height: 100%;
   }
-  .main{
-    ul{
-      margin: 0;
-      padding: 0;
-    }
-    li{
-      list-style: none;
-    }
-    .tabs {
-      overflow: hidden;
-    }
-    .tabs li,.tabs label {
-      display: flex;
-      align-items: center;
-      justify-content: center;      
-      float: left;
-      width: 4rem;
-      height: 1rem;
-      padding: .1rem;
-      cursor: pointer;
-      transition: .2s;
-      font-size:0.5rem;
-    }
-    .tabs li:not(:first-child),.tabs label:not(:first-of-type) {
-      border-left: none;
-    }
-    .tabs li.active,.tabs :checked + label {
-      font-size:0.8rem;
-      font-weight: bold;
-      cursor: auto;
-      background-color:@yellow;
-    }
-    .contents{
-      overflow: hidden;
-      margin:0.25em 0;
-    }
-
-  }
-
   .contents {
     list-style-type: none;
     margin: 0;
     padding: 0;
     >.text{
+      .base;
       textarea{
+        box-sizing: border-box;
         width:100%;
-        height:10rem;
+        height:100%;
         resize: none;
-        padding: 0;
+        padding: .25rem;
         border: none;
         border-width: 0;
         overflow-y: scroll;
+        color:black;
+        background-color: white;
+        
       }
       textarea:focus {
         border-width: 0;
         background-color: @light-gray;
         outline: none;
+        color:black;
       }      
     }    
-  }
-  .footer{
-    padding:.5rem 0 0 0;
-
   }  
 }
 </style>

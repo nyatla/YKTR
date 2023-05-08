@@ -52,7 +52,6 @@ export default
     watch:{
       "status.rawdata":{
         handler(new_,old_) {
-          console.log(new_)
           if(old_===undefined || new_.length<=old_.length){
             this._dec=new BrokenCodeText();
             this._dec.update(new_);

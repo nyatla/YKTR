@@ -19,20 +19,39 @@ function toHex(value, d) {
 
 
 const DEFAULT_SETTING={
+    preamble:{
+      cycle:4
+    },
     frequency:['8kHz', { freq: 8000 }],
     tone:['SIN', { points: 100, cycle: 1 }]
 };
 
-
-class RxStatusData{
-    constructor(sid){
-      this.sid=sid;
-      this.type="rx";
-      this.datetime=new Date();
-      this.rawdata=[];
-      this.fixed=false;
-    }
+class StatusData{
+  constructor(sid,type){
+    this.sid=sid;
+    this.type=type;
+    this.datetime=new Date();
   }
+}
+class RxStatusData extends StatusData{
+  constructor(sid){
+    super(sid,"rx");
+    this.rawdata=[];
+    this.fixed=false;//受信済フラグ
+  }
+}
+
+class TxStatusData extends StatusData{
+  constructor(sid){
+    super(sid,"tx");
+    this.rawdata=[];
+    this.fixed=false;//送信済みフラグ
+    this.progress=0;// "0:変調中/0以外:送信中/"
+  }
+}
+
+
+
   
 class StatusDataBuilder{
     constructor(){
@@ -41,6 +60,9 @@ class StatusDataBuilder{
     newRx(){
         return new RxStatusData(this._sid_counter++);
     }
+    newTx(){
+      return new TxStatusData(this._sid_counter++);
+  }    
 }
 
 //ダミーデータ生成インスタンス

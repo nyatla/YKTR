@@ -92,14 +92,12 @@ export default
 @import "./window.less";
 
 
+
 .rxdatainfo {
-  .inherit_app_setting;
+  .modalwindow;
   background-color: @RX_BG;
-  padding: .25rem;
-  border: solid black 1px;
-  position: relative;
-  top:25vh;
-  height:16.5rem;
+
+  
 
   .top {
     display: flex;
@@ -163,59 +161,5 @@ export default
     }
   }
 
-  >hr {
-    height: 1px;
-    background-color: black;
-    border: none;
-  }
-  .main{
-    ul{
-      margin: 0;
-      padding: 0;
-    }
-    li{
-      list-style: none;
-    }
-    .tabs {
-      overflow: hidden;
-    }
-    .tabs li,.tabs label {
-      display: flex;
-      align-items: center;
-      justify-content: center;      
-      float: left;
-      width: 4rem;
-      height: 1rem;
-      padding: .1rem;
-      cursor: pointer;
-      transition: .2s;
-      font-size:0.5rem;
-    }
-    .tabs li:not(:first-child),.tabs label:not(:first-of-type) {
-      border-left: none;
-    }
-    .tabs li.active,.tabs :checked + label {
-      font-size:0.8rem;
-      font-weight: bold;
-      cursor: auto;
-      background-color:@yellow;
-    }
-    .details{
-      overflow: hidden;
-      margin:0.25em 0;
-    }
-    .contents {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-      >li{
-        height: 10rem;
-      }
-    }
-  }
-  .footer{
-    padding:.5rem 0 0 0;
-
-  }
 }
 </style>

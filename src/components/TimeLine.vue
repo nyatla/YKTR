@@ -1,26 +1,24 @@
 <template>
   <div class="timeline" v-if="!closed">
     <div class="top_panel">
-      <StatusDashboard ref="dashboardRef" :setting="setting" :activity_time_text="activity_time_text" @debug="debug"></StatusDashboard>
+      <StatusDashboard ref="dashboardRef" :setting="setting" :activity_time_text="activity_time_text"></StatusDashboard>
     </div>
     <ul class="status-ul">
         <li v-for="(status, index) in statuses" :key="index">
-            <RxStatus v-if="status.type == 'rx'" :status="status" @event-click="OnRxClick"></RxStatus>
-        </li>
-        <li v-for="index in 2">
-          <RxStatus  @event-click="OnRxClick"></RxStatus>
+          <RxStatus v-if="status.type == 'rx'" :status="status" @event-click="OnRxClick"></RxStatus>
+          <TxStatus v-if="status.type == 'tx'" :status="status" @event-click="OnTxClick"></TxStatus>
         </li>
     </ul>
     <div class="footer_shadow"></div>
     <div class="footer_panel">
-      <button>Back</button>
+      <button @click="OnBackClick">Back</button>
       <button @click="OnNewTxClick">Transmit</button>
     </div>
     <ModalFrame v-if="modal=='rx'">
-      <RxResultWindow  :status="current_status" @event-close="OnModalClose"></RxResultWindow>
+      <RxResultWindow  :status="selected_rx_status" @event-close="OnModalClose"></RxResultWindow>
     </ModalFrame>
     <ModalFrame v-if="modal=='newtx'">
-      <TxInputWindow  :setting="setting" @event-close="OnModalClose"></TxInputWindow>
+      <TxInputWindow  :setting="setting" @event-transmit="OnTransmit" @event-close="OnModalClose"></TxInputWindow>
     </ModalFrame>
 
 
@@ -31,8 +29,9 @@
 
   
 <script>
-import {DEFAULT_SETTING,RxStatusData,StatusDataBuilder,dbg} from "../assets/classes"
+import {DEFAULT_SETTING,RxStatusData,StatusDataBuilder,assert,dbg} from "../assets/classes"
 import RxStatus from './RxStatus.vue';
+import TxStatus from './TxStatus.vue';
 import StatusDashboard from './StatusDashboard.vue';
 import RxResultWindow from './window/RxResultWindow.vue';
 import TxInputWindow from './window/TxInputWindow.vue';
@@ -88,17 +87,10 @@ class Stopwatch {
   }
 }
 
-
-
-
-let DBG_DATA = [56, 58, 57, 2, 0x88, 88, 5, 8, 0xe3, 0x81, 0x82, 56, 56, 56, 56, 56, 56, 56, 66, 24, 58, 56];
-let dbg_c = 0;
-function dbgstream() {
-  return DBG_DATA[(dbg_c++) % DBG_DATA.length];
-}
 export default {
   components: {
     RxStatus,
+    TxStatus,
     StatusDashboard,
     RxResultWindow,
     TxInputWindow,
@@ -124,13 +116,14 @@ export default {
       activity_time_text:"",
       title: "TBSK Audio Terminal",
       statuses: [
-        // {
-        //   sid:0,
-        //   type:"rx",
-        //   rawdata:[]
-        // }
       ],
-      current_sid: undefined,//操作対象のsid
+      selected_sid:undefined, //操作対象のsid
+      active_rx_sid: undefined,//アクティブなRX
+      active_tx_sid: undefined,//アクティブなRX
+      active_tx_info:{
+        message:"",//状態を表示するメッセージ"Modulating→Transmitting→Completed!"
+        estimated_transmit_time:0,//推定送信時間
+      },
       closed: false
     }
   },
@@ -145,11 +138,12 @@ export default {
       tone=new tbsk.SinTone(setting.tone[1].points,setting.tone[1].cycle);
       break;
     case 'XPSK':
-      tone=new tbsk.SinTone(setting.tone[1].points,setting.tone[1].cycle,setting.tone[1].div);
+      tone=new tbsk.XPskSinTone(setting.tone[1].points,setting.tone[1].cycle,setting.tone[1].div);
       break;
     default:
       throw new Error("Invalid tone",tone);
     }
+    console.log(setting.frequency[1]["freq"],tone);
     let socket = new this.tbsk.misc.TbskSocket({
       carrier: setting.frequency[1]["freq"],
       tone:tone,
@@ -162,8 +156,8 @@ export default {
     socket.addEventListener("detected", (event) => { _t.detected(event); });
     socket.addEventListener("message", (event) => { _t.message(event); });
     socket.addEventListener("lost", (event) => { _t.lost(event); });
-    // socket.addEventListener("sendstart",(event)=>{console.log("TX:("+event.id+")");});
-    // socket.addEventListener("sendcompleted",(event)=>{console.log("done\n");});
+    socket.addEventListener("sendstart",(event)=>{_t.sendstart(event);});
+    socket.addEventListener("sendcompleted",(event)=>{_t.sendcompleted(event);});
     //socket.addEventListener("close",(event)=>{console.log("closed!\n");});
     await socket.waitOpenAS();
     let stopwatch=new Stopwatch();
@@ -174,62 +168,90 @@ export default {
     },30);
     this._stopwatch=stopwatch;
     this._socket = socket;
+
+    {
+      for(let i=0;i<3;i++){
+        let rs=this.status_builder.newRx();
+        this.selected_sid = rs.sid;
+        this.statuses.unshift(rs);
+        for(let i of [56, 58, 57, 2, 0x88, 88, 5, 8, 0xe3, 0x81, 0x82, 56, 56, 56, 56, 56, 56, 56, 66, 24, 58, 56]){
+          rs.rawdata.push(i);
+        }
+        rs.fixed=true;
+        this.active_rx_sid=undefined;
+      }
+    }
+
   },
-  beforeUnmount(){
-    clearInterval(this._timer);
-  },  
   created() {
 
   },
   beforeUnmount() {
+    clearInterval(this._timer);
     this._socket.close();
     //closeに時間かかるかも。
     return this._socket.waitCloseAS();//Promise
   },
   computed:{
-    current_status(){
-      return this.statuses[this.current_sid];
+    selected_rx_status(){
+      console.log(this.statuses);
+      assert(this.selected_sid!=undefined && this.statuses[this.selected_sid].type=="rx");
+      return this.statuses[this.selected_sid];
     }
   },
   methods: {
     OnRxClick(event){
-      this._current_sid=event.sid;
+      this.selected_sid=event.sid;
       this.modal="rx";
+    },
+    OnTxClick(event){
+
     },
     OnNewTxClick(event){
       this.modal="newtx";
     },
-    OnModalClose(event){
+    async OnBackClick(event){
+      await this.close();
+    },
+    OnTransmit(event){
+      let data=event.data;
+      let ts=this.status_builder.newTx();
+      ts.rawdata=data;
+      this.active_tx_sid=ts.sid;
+      this.statuses.unshift(ts);
+      this.active_tx_info.message="Modulating";
+      this._socket.send(ts.rawdata);
       this.modal="";
     },
-    debug(type) {
-      console.log(type);
-      switch (type) {
-        case "detect":
-          this.detected();
-          break;
-        case "message":
-          this.message(dbgstream());
-          break;
-        case "lost":
-          break;
-      }
+    async OnModalClose(event){
+      this.modal="";
     },
-    close() {
+    sendstart(event){
+      let status = this.statuses.find(item => item.sid == this.active_tx_sid);
+      this.active_tx_info.message+="-> Transmiting";//微妙。
+    },
+    sendcompleted(event){
+      let status = this.statuses.find(item => item.sid == this.active_tx_sid);
+      this.active_tx_info.message+="-> Completed";//微妙。
+    },
+    async close() {
+      this.modal="";//modalのクローズ
       this._socket.close();
-    },    
+      await this._socket.waitCloseAS();
+      this.$emit("event-close");
+    },
     // eslint-disable-next-line no-unused-vars
     detected(event)
     {
       console.log("detected",event.id);
       let rs=this.status_builder.newRx();
-      this.current_sid = rs.sid;
-      console.log(rs);
+      this.selected_sid = rs.sid;
+
       this.statuses.unshift(rs);
     },
     // eslint-disable-next-line no-unused-vars
     message(event) {
-      let status = this.statuses.find(item => item.sid == this.current_sid);
+      let status = this.statuses.find(item => item.sid == this.active_rx_sid);
       for(let i of event.data){
         status.rawdata.push(i);
       }
@@ -237,8 +259,9 @@ export default {
     },
     // eslint-disable-next-line no-unused-vars
     lost(event) {
-      let status = this.statuses.find(item => item.sid == this.current_sid);
+      let status = this.statuses.find(item => item.sid == this.active_rx_sid);
       status.fixed=true;
+      this.active_rx_sid=undefined;
     },/*
       send(){
         //受信中なら閉じる

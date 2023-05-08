@@ -8,8 +8,8 @@
         <div>{{ formattedTime }}</div>
       </div>
       <div class="info">
-        <div>{{ rawdata.length }} byte</div>
-        <AdaptiveRightScrollDiv :text="rawdata"></AdaptiveRightScrollDiv>
+        <div>{{ status.rawdata.length }} byte</div>
+        <AdaptiveRightScrollDiv :text="status.rawdata"></AdaptiveRightScrollDiv>
       </div>
     </div>
     <div class="sub">
@@ -34,8 +34,10 @@ export default
       AdaptiveRightScrollDiv,
     },    
     props: {
-      rawdata: Array,
-      datetime:Object,
+      status:{
+        type:Object,
+        default:undefined        
+      },
       info:{
         line1:String,
         line2:String,
@@ -52,10 +54,10 @@ export default
     },
     computed: {
       formattedDate() {
-        return this.datetime.toLocaleDateString(navigator.language);
+        return this.status.datetime.toLocaleDateString(navigator.language);
       },
       formattedTime() {
-        return this.datetime.toLocaleTimeString(navigator.language, { hour12: false ,hour: 'numeric', minute: '2-digit'});
+        return this.status.datetime.toLocaleTimeString(navigator.language, { hour12: false ,hour: 'numeric', minute: '2-digit'});
       }
     }
   }
