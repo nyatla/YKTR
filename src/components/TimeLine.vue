@@ -29,9 +29,9 @@
 
   
 <script>
-import {DEFAULT_SETTING,RxStatusData,StatusDataBuilder,assert,dbg} from "../assets/classes"
-import RxStatus from './RxStatus.vue';
-import TxStatus from './TxStatus.vue';
+import {DEFAULT_SETTING,StatusDataBuilder,assert,dbg} from "../assets/classes"
+import RxStatus from './status/RxStatus.vue';
+import TxStatus from './status/TxStatus.vue';
 import StatusDashboard from './StatusDashboard.vue';
 import RxResultWindow from './window/RxResultWindow.vue';
 import TxInputWindow from './window/TxInputWindow.vue';
@@ -245,7 +245,7 @@ export default {
     {
       console.log("detected",event.id);
       let rs=this.status_builder.newRx();
-      this.selected_sid = rs.sid;
+      this.active_rx_sid = rs.sid;
 
       this.statuses.unshift(rs);
     },

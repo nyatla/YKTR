@@ -35,8 +35,8 @@
 import LoginForm from './components/LoginForm.vue'
 
 import StatusDashBoard from './components/StatusDashboard.vue'
-import TxStatus from './components/TxStatus.vue'
-import RxStatus from './components/RxStatus.vue'
+import TxStatus from './components/status/TxStatus.vue'
+import RxStatus from './components/status/RxStatus.vue'
 
 import RxResultWindow from './components/window/RxResultWindow.vue'
 import TxInputWindow from './components/window/TxInputWindow.vue'

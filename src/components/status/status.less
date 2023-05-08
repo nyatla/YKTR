@@ -1,0 +1,67 @@
+@import "@/assets/global.less";
+
+
+.statusframe {
+//  background-color: @RX_BG;
+  cursor:pointer;
+  padding: .25rem;
+
+  .top {
+    display: flex;
+    overflow: hidden;
+    >.label {
+      border: black 1px solid;
+      height: 2rem;
+      font-weight: bolder;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    >.x_type {
+      .label;
+      width: 2rem;
+      min-width: 2rem;
+//      background-color: @RX_LABEL_BG;
+//      color: @RX_LABEL_TXT;
+    }
+
+    >.d_type {
+      margin-left: 0.25rem;
+      .label;
+      width: 4rem;
+      min-width: 4rem;
+    }
+    >.datetime {
+      margin-left: 0.25rem;
+      >* {
+        width: 5rem;
+      }
+      >:nth-child(1) {
+        font-size: 0.5rem;
+      }
+      >:nth-child(2) {
+        font-family: sans-serif monospace;
+        margin-top: 0.0rem;
+        font-size: 1.3rem;
+        font-weight: bold;
+      }
+    }
+    >.info {
+      width: 100%;
+      margin-left: auto;
+      margin-right: 0;
+      text-align: right;
+      // overflow: hidden;
+
+      >:nth-child(1) {
+        font-size: 0.5rem;
+      }
+      >:nth-child(2) {
+        font-size: 1.3rem;
+        width: 100%;
+        margin-top: 0.0rem;
+        overflow-x: hidden;
+      }
+    }
+  }
+}
