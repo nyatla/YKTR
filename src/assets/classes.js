@@ -122,7 +122,8 @@ class TxStatusData extends StatusData{
     super(sid,"tx");
     this.rawdata=[];
     this.fixed=false;//送信済みフラグ
-    this.progress=0;// "0:変調中/0以外:送信中/"
+    this.cache.mode=0;    //表示モード(0=メッセージ,1=データ)
+    this.cache.message="";//表示モード0の時のメッセージ
   }
 }
 

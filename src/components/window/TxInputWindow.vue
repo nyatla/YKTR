@@ -113,7 +113,7 @@ export default
         if(this.txdata.length==0){
           return "0";
         }
-        console.log(this.setting);
+        // console.log(this.setting);
         let sec=(this.txdata.length*8+this.setting.preamble.cycle*2+1)/this.setting.baud;
         if(sec<0.1){
           return "<0.1";

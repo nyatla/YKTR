@@ -9,7 +9,7 @@
       </div>
       <div class="info">
         <div>{{ info.line1 }}</div>
-        <div>{{ status.rawdata.length }} bytes received.</div>
+        <div>{{ status.rawdata.length }} bytes transmitted.</div>
       </div>
     </div>
     <hr />

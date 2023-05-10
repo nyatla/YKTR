@@ -6,7 +6,7 @@
     <ul class="status-ul">
         <li v-for="(status, index) in statuses" :key="status.sid">
           <RxStatus v-if="status.type == 'rx'" :status="status" @event-click="OnRxClick"></RxStatus>
-          <TxStatus v-if="status.type == 'tx'" :info="active_tx_info" :status="status" @event-click="OnTxClick"></TxStatus>
+          <TxStatus v-if="status.type == 'tx'" :status="status" @event-click="OnTxClick"></TxStatus>
         </li>
     </ul>
     <div class="footer_shadow"></div>
@@ -125,10 +125,6 @@ export default {
       selected_sid:undefined, //操作対象のsid
       active_rx_sid: undefined,//アクティブなRX
       active_tx_sid: undefined,//アクティブなRX
-      active_tx_info:{
-        message:"",//状態を表示するメッセージ"Modulating→Transmitting→Completed!"
-        estimated_transmit_time:0,//推定送信時間
-      },
       closed: false
     }
   },
@@ -211,24 +207,24 @@ export default {
       let data=event.data;
       let ts=this.status_builder.newTx();
       ts.rawdata=data;
+      ts.cache.mode=0;
+      ts.cache.message="Modulating";
       this.active_tx_sid=ts.sid;
       this.statuses.unshift(ts);
-      this.active_tx_info.message="Modulating";
       this._socket.send(ts.rawdata);
       this.modal="";
-      console.log(this.active_tx_info);
     },
     async OnModalClose(event){
       this.modal="";
     },
     sendstart(event){
-//      let status = this.statuses.find(item => item.sid == this.active_tx_sid);
-      this.active_tx_info.message="Transmiting";//微妙。
+      let status = this.statuses.find(item => item.sid == this.active_tx_sid);
+      status.cache.message="Transmiting";
     },
     sendcompleted(event){
       let status = this.statuses.find(item => item.sid == this.active_tx_sid);
-      this.active_tx_info.message="Completed";//微妙。
-      status.fixed=true;
+//      status.cache.message="Completed";
+//      status.fixed=true;
     },
     async close() {
       this.modal="";//modalのクローズ

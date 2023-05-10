@@ -10,10 +10,9 @@
       <div class="info">
         <div>{{ status.rawdata.length }} byte</div>
         <AdaptiveScrollDiv ref="scrolldiv">
-          <div class="static_center">{{ infotext }}</div>
-          <!-- <template v-slot:contents>
-            <span>{{infotext}}</span>
-          </template> -->
+          <template v-slot:contents>
+            <div v-if="mode==0" class="statictext">{{ static_message }}</div>
+          </template>          
         </AdaptiveScrollDiv>
       </div>
     </div>
@@ -24,7 +23,7 @@
 
 <script>
 
-import {Functions} from '../../assets/classes';
+import {dbg,Functions} from '../../assets/classes';
 import TextView from '../view/TextView.vue';
 import HexView from '../view/HexView.vue';
 import AdaptiveScrollDiv from '../ctrl/AdaptiveScrollDiv.vue';
@@ -42,17 +41,18 @@ export default
     props: {
       status:{
         type:Object,
-        default:undefined        
+        default:dbg.txDummyData(),        
       },
-      //暫定コンテンツ
-      info:undefined,
     },
     data() {
       return {
-        active_tab:"text",
         date: new Date(),
-        infotext:"",
+        mode:0,//表示モード
+        static_message:"",
       }
+    },
+    mounted(){
+      this.$refs.scrolldiv.setMode(11,true);
     },
     watch:{
       "status.fixed":{
@@ -62,20 +62,24 @@ export default
           }
         }
       },
-      "info":{
+      "status.cache.mode":{
         handler(new_,old_){
-          this.infotext=new_.message;
-          console.log(this.infotext);
+          console.log("newmode");
+          this.mode=new_;
+//          this.$refs.scrolldiv.setMode(11,true);//再計算
         },
-        deep:true
-
-      }
+      },
+      "status.cache.message":{
+        handler(new_,old_){
+          this.static_message=new_;
+        },
+      },
     },    
     methods: {
       handleClick(){
         //クリックされた通知
         this.$emit("event-click",{sid:this.status.sid});
-      }      
+      }
     },
     computed: {
       formattedDate() {return Functions.formattedDate(this.status.datetime)},
@@ -92,6 +96,12 @@ export default
   .statusframe;
   background-color: @TX_BG;
 
+  .statictext{
+    display: inline-block;
+    background-color: red;
+//    width:10rem;
+    text-align:center;
+  }
   .top {
     >.x_type {
       

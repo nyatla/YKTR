@@ -29,6 +29,7 @@ export default {
              * 12:右端固定
              */
              _mode:0,////
+             _reset_requred:false,
         }
     },
     mounted() {
@@ -43,19 +44,10 @@ export default {
     },
     methods:
     {
-        setMode(m,reset=false){
-            if(reset){
-                switch(m){
-                case 10:
-                case 0:
-                    this.offset=0;
-                    break;
-                case 1:
-                case 2:
-                    this.offset=this.$refs.text.scrollWidth;
-                    break;
-                }
-            }
+        setMode(m,reset=false)
+        {
+            //次の描画タイミングでリセットする。
+            this._reset_requred=reset;
             this._mode=m;
         },
         _handleResize() {
@@ -74,9 +66,25 @@ export default {
             let textwidth=this.$refs.text.scrollWidth;
             let screenwidth=this.$refs.marquee.offsetWidth;
             let step=this.speed*this.$refs.text.scrollHeight/10;
-            if(textwidth+offset<0){
-                this.offset=0;
-                offset=0;
+            console.log(textwidth);
+            if(this._reset_requred){
+                switch(this._mode){
+                case 11:
+                    this.offset=Math.floor((screenwidth-textwidth)*0.5);
+                    break;
+                case 10:
+                case 0:
+                    this.offset=0;
+                    break;
+                case 1:
+                case 2:
+                    this.offset=textwidth;
+                    break;
+                }
+                //コンテンツ幅が0の場合はレンダリング待ちのためにリセットしない
+                if(textwidth!=0){
+                    this._reset_requred=false;                    
+                }
             }
             switch(this._mode){
                 case 0:{
@@ -90,6 +98,12 @@ export default {
                     break;
                 }
                 case 1:{
+                    //左端までスクロールしていたらもどす？
+                    if(textwidth+offset<0){
+                        this.offset=0;
+                        offset=0;
+                    }
+
                     //右端をスクロールアウトして左端を再表示する。
                     let rpadding=textwidth+offset;//右端のhidden幅
                     if(offset<0){
@@ -103,6 +117,13 @@ export default {
                         if(this.offset<0){
                             this.offset=0;
                         }
+                    }
+                    break;
+                }
+                case 11:{
+                    let coffset=Math.floor((screenwidth-textwidth)*0.5);
+                    if(coffset!=this.offset){
+                        this.offset=coffset;
                     }
                     break;
                 }
