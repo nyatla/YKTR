@@ -64,6 +64,7 @@ export default
           let dec=this.status.cache._dec;
           this.fixedtext=dec.fixed;
           this.unfixed=dec.unfixed;
+          this.$refs.scrolldiv.update();
         },
 //        immediate:true,
         deep:true//暫定実装。パフォーマンスに影響があるのででっかい配列の場合は処理を切り替えて

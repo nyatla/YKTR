@@ -223,8 +223,10 @@ export default {
     },
     sendcompleted(event){
       let status = this.statuses.find(item => item.sid == this.active_tx_sid);
-//      status.cache.message="Completed";
-//      status.fixed=true;
+      status.cache.message="Completed";
+      setTimeout(()=>{
+        status.fixed=true;
+      },500);
     },
     async close() {
       this.modal="";//modalのクローズ

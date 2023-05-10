@@ -64,14 +64,16 @@ export default
       },
       "status.cache.mode":{
         handler(new_,old_){
-          console.log("newmode");
+          if(this.status.fixed){
+            return;
+          }
           this.mode=new_;
-//          this.$refs.scrolldiv.setMode(11,true);//再計算
         },
       },
       "status.cache.message":{
         handler(new_,old_){
           this.static_message=new_;
+          this.$refs.scrolldiv.update();
         },
       },
     },    
@@ -98,8 +100,6 @@ export default
 
   .statictext{
     display: inline-block;
-    background-color: red;
-//    width:10rem;
     text-align:center;
   }
   .top {

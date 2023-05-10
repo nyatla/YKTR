@@ -30,12 +30,13 @@ export default {
              */
              _mode:0,////
              _reset_requred:false,
+             animationFrame:null,
         }
     },
     mounted() {
-        this.$nextTick(() => {
-            this._startAnimation()
-        })
+        // this.$nextTick(() => {
+        //     this._startAnimation()
+        // })
         window.addEventListener('resize', this._handleResize)
     },
     beforeUnmount() {
@@ -49,11 +50,23 @@ export default {
             //次の描画タイミングでリセットする。
             this._reset_requred=reset;
             this._mode=m;
+            this._startAnimation();
+        },
+        /**
+         * スロットを更新したときに呼び出す。
+         */
+        update(){
+            this._startAnimation();
         },
         _handleResize() {
-//            this.mode=0;
+            console.log("resize");
+            this._startAnimation();
         },
         _startAnimation() {
+            //二重起動防止
+            if(this.animationFrame){
+                return;
+            }
             this.animationFrame = requestAnimationFrame(this.scrollContent)
         },
         _stopAnimation() {
@@ -62,18 +75,32 @@ export default {
         },
         scrollContent()
         {
-            let offset=this.offset;
+            this.animationFrame=null;
             let textwidth=this.$refs.text.scrollWidth;
+//            console.log("sc",textwidth);
+            if(textwidth==0){
+                //再起動
+                this.animationFrame = requestAnimationFrame(this.scrollContent)
+                return;
+            }
+            let offset=this.offset;
             let screenwidth=this.$refs.marquee.offsetWidth;
             let step=this.speed*this.$refs.text.scrollHeight/10;
-            console.log(textwidth);
+            //座標計算
+            switch(this._mode){
+                //固定系
+            case 10://左端固定
+                this.offset=0;
+                return;
+            case 11://中央固定
+                this.offset=Math.floor((screenwidth-textwidth)*0.5);
+                return;
+            }
+
             if(this._reset_requred){
                 switch(this._mode){
-                case 11:
-                    this.offset=Math.floor((screenwidth-textwidth)*0.5);
-                    break;
-                case 10:
-                case 0:
+                //遷移系
+                case 0://右端固定
                     this.offset=0;
                     break;
                 case 1:
@@ -81,58 +108,50 @@ export default {
                     this.offset=textwidth;
                     break;
                 }
-                //コンテンツ幅が0の場合はレンダリング待ちのためにリセットしない
-                if(textwidth!=0){
-                    this._reset_requred=false;                    
-                }
             }
-            switch(this._mode){
-                case 0:{
-                    let rpadding=textwidth-screenwidth+offset;//右端のhiddn幅
-                    //左端優先で右端に揃える
+            let transition=false;
+            switch(this._mode)
+            {
+            case 0:{
+                let rpadding=textwidth-screenwidth+offset;//右端のhiddn幅
+                //左端優先で右端に揃える
+                if(rpadding>0){
+                    this.offset -= rpadding>step?step:rpadding;
+                }else if(rpadding<0 && this.offset<0){
+                    this.offset += -rpadding>step?step:-rpadding;;
+                }
+                //アニメーションの継続条件
+                transition=rpadding!=0;
+                }
+                break;
+            case 1:{
+                //左端までスクロールしていたらもどす？
+                if(textwidth+offset<0){
+                    this.offset=0;
+                    offset=0;
+                }
+                //右端をスクロールアウトして左端を再表示する。
+                let rpadding=textwidth+offset;//右端のhidden幅
+                if(offset<0){
                     if(rpadding>0){
                         this.offset -= rpadding>step?step:rpadding;
-                    }else if(rpadding<0 && this.offset<0){
-                        this.offset += -rpadding>step?step:-rpadding;;
+                    }else if(rpadding<=0){
+                        this.offset = Math.floor(screenwidth*1.1);
                     }
-                    break;
-                }
-                case 1:{
-                    //左端までスクロールしていたらもどす？
-                    if(textwidth+offset<0){
+                }else if(offset!=0){
+                    this.offset -= step;
+                    if(this.offset<0){
                         this.offset=0;
-                        offset=0;
                     }
-
-                    //右端をスクロールアウトして左端を再表示する。
-                    let rpadding=textwidth+offset;//右端のhidden幅
-                    if(offset<0){
-                        if(rpadding>0){
-                            this.offset -= rpadding>step?step:rpadding;
-                        }else if(rpadding<=0){
-                            this.offset = Math.floor(screenwidth*1.1);
-                        }
-                    }else if(offset!=0){
-                        this.offset -= step;
-                        if(this.offset<0){
-                            this.offset=0;
-                        }
-                    }
-                    break;
                 }
-                case 11:{
-                    let coffset=Math.floor((screenwidth-textwidth)*0.5);
-                    if(coffset!=this.offset){
-                        this.offset=coffset;
-                    }
-                    break;
+                //アニメーションの継続条件
+                transition=offset!=0;
                 }
-                case 10:
-                    break;
-
+                break;
             }
-//            console.log("mode",this._mode);
-            this.animationFrame = requestAnimationFrame(this.scrollContent);
+            if(transition){
+                this.animationFrame = requestAnimationFrame(this.scrollContent);
+            }
         },
     }
 }
