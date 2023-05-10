@@ -110,6 +110,14 @@ export default
       color: @RX_LABEL_TXT;
     }
     >.info {
+      .hexascii{
+        display: inline-block;
+        text-align: center;
+        font-size: 0.8rem;
+        margin:0 0.1rem;
+        background-color: @light-gray;
+        width:1.2rem;
+      }
       .unfixed{
         display: inline-block;
         text-align: center;
