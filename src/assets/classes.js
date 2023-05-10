@@ -1,3 +1,19 @@
+const Functions={
+  toHex:(value, d)=>{
+    let r = value.toString(16);
+    while (r.length < d) {
+        r = '0' + r;
+    }
+    return r;
+  },
+  formattedDate:(d)=>{
+    return d.toLocaleDateString(navigator.language);
+  },
+  formattedTime:(d)=>{
+    return d.toLocaleTimeString(navigator.language, { hour12: false ,hour: 'numeric', minute: '2-digit'});
+  }
+}
+
 function clone(v){
     return  JSON.parse(JSON.stringify(v));
 }
@@ -16,21 +32,80 @@ function toHex(value, d) {
     }
     return r;
 }
+class Spec{
+  constructor(name){
+    this.name=name;
+  }
+}
+class FrequencySpec extends Spec{
+  constructor(freq){
+    super(`${Math.floor(freq/1000)}Hz`);
+    this.freq=freq;
+  }
+}
 
 
-const DEFAULT_SETTING={
-    preamble:{
-      cycle:4
-    },
-    frequency:['8kHz', { freq: 8000 }],
-    tone:['SIN', { points: 100, cycle: 1 }]
-};
+class ToneSpec extends Spec{
+  constructor(name,points,cycle){
+    super(name);
+    this.points=points;
+    this.cycle=cycle;
+  }
+  get ticks(){
+    return this.points*this.cycle;
+  }
+  createInstance(tbsk){
+    throw new Error();
+  }
+}
+class SinToneSpec extends ToneSpec{
+  constructor(points=10,cycle=10){
+    super("SIN",points,cycle);
+  }
+  createInstance(tbsk){
+    return new tbsk.SinTone(this.points,this.cycle);
+  }
+}
+class XpskSinToneSpec extends ToneSpec{
+  constructor(points=10,cycle=10,div=8){
+    super("XPSK",points,cycle);
+    this.div=8;
+  }
+  createInstance(tbsk){
+    return new tbsk.XPskSinTone(this.points,this.cycle,this.div);
+  }
+}
+/**
+ * 変調パラメータのスペック値を格納する
+ */
+class ModulationSpec
+{
+  /**
+   * 
+   * @param {int} preamble_cycle 
+   * @param {FrequencySpec} frequency 
+   * @param {ToneSpec} tone 
+   */
+  constructor(preamble_cycle,freqspec,tonespec){
+    this.preamble={cycle:preamble_cycle};
+    this.frequency=freqspec;
+    this.tone=tonespec;
+  }
+  get baud(){
+    return this.frequency.freq/(this.tone.ticks);
+  }
+}
+
+const DEFAULT_SETTING=new ModulationSpec(4,new FrequencySpec(8000),new SinToneSpec());
+
+
 
 class StatusData{
   constructor(sid,type){
     this.sid=sid;
     this.type=type;
     this.datetime=new Date();
+    this.cache={};//データキャッシュ
   }
 }
 class RxStatusData extends StatusData{
@@ -38,6 +113,7 @@ class RxStatusData extends StatusData{
     super(sid,"rx");
     this.rawdata=[];
     this.fixed=false;//受信済フラグ
+    this.cache._dec=new BrokenCodeText();
   }
 }
 
@@ -71,10 +147,17 @@ class DummyData{
         this._sb=new StatusDataBuilder();
     }
     rxDummyData(){
+        console.log("generated");
         let s=this._sb.newRx();
         s.rawdata.push(52,53,54,55,56);
         return s;
     }
+    txDummyData(){
+      let s=this._sb.newTx();
+      s.rawdata.push(52,53,54,55,56);
+      return s;
+  }
+
 }
 const dbg=new DummyData();
 
@@ -130,7 +213,9 @@ export {
     clone,
     toHex,
     dbg,
+    Functions,
     RxStatusData,StatusDataBuilder,
     BrokenCodeText,
-    DEFAULT_SETTING
+    DEFAULT_SETTING,
+    ModulationSpec,FrequencySpec,XpskSinToneSpec,SinToneSpec,
 }

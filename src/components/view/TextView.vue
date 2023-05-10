@@ -7,13 +7,13 @@
 </template>
 
 <script>
-import {BrokenCodeText,toHex} from "../../assets/classes"
+import {BrokenCodeText,Functions} from "../../assets/classes"
 
 
 export default
   {
     props: {
-      rawdata:Array
+      rawdata:Array|Uint8Array
     },
     data() {
       return {
@@ -39,7 +39,7 @@ export default
       }
     },
     methods: {
-      toHex:toHex,
+      toHex:Functions.toHex,
     },
     computed: {
       fixedText() {

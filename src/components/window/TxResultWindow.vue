@@ -1,7 +1,7 @@
 <template>
   <div class="rxdatainfo">
     <div class="top">
-      <div class="x_type">RX</div>
+      <div class="x_type">TX</div>
       <div class="d_type">DATA</div>
       <div class="datetime">
         <div>{{ formattedDate }}</div>
@@ -51,7 +51,7 @@ export default
     props: {
       status:{
         type:Object,
-        default:dbg.rxDummyData(),
+        default:dbg.txDummyData(),
       },      
       info:{
         type:Object,
@@ -75,7 +75,7 @@ export default
     },
     computed: {
       formattedDate() {return Functions.formattedDate(this.status.datetime)},
-      formattedTime() {return Functions.formattedTime(this.status.datetime)}
+      formattedTime() {return Functions.formattedTime(this.status.datetime)},
     }
   }
 </script>
@@ -88,12 +88,12 @@ export default
 
 .rxdatainfo {
   .modalwindow;
-  background-color: @RX_BG;
+  background-color: @TX_BG;
   .top {
     display: flex;
     >.x_type {
-      background-color: @RX_LABEL_BG;
-      color: @RX_LABEL_TXT;
+      background-color: @TX_LABEL_BG;
+      color: @TX_LABEL_TXT;
     }
   }
 }

@@ -8,11 +8,11 @@
         <div>{{ formattedTime }}</div>
       </div>
       <div class="info">
-        <div>{{ status.rawdata.length }} byte</div>
+        <div><span v-if="status.fixed"></span>{{ status.rawdata.length }} byte</div>        
         <AdaptiveScrollDiv ref="scrolldiv">
           <template v-slot:contents>
-            <span v-for="(c, i) in fixed" v-bind:key="i" :class="{ 'hexascii': (typeof c) != 'string' }">{{ ((typeof c) == 'string') ? c : toHex(c, 2) }}</span>
-          <span class="unfixed" v-for="(c, i) in unfixed" v-bind:key="i">{{ toHex(c, 2) }}</span>            
+            <span v-for="(c, i) in fixedtext" v-bind:key="i" :class="{ 'hexascii': (typeof c) != 'string' }">{{ ((typeof c) == 'string') ? c : toHex(c, 2) }}</span>
+            <span class="unfixed" v-for="(c, i) in unfixed" v-bind:key="i">{{ toHex(c, 2) }}</span>        
           </template>
         </AdaptiveScrollDiv>
       </div>
@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import {BrokenCodeText,toHex,dbg} from '../../assets/classes';
+import {BrokenCodeText,Functions,dbg} from '../../assets/classes';
 
 import TextView from '../view/TextView.vue';
 import HexView from '../view/HexView.vue';
@@ -53,47 +53,46 @@ export default
       "status.fixed":{
         handler(new_,old_){
           if(new_===true && old_===false){
-            console.log("FIXs");
-            this.$refs.scrolldiv.fix();
+//            console.log("FIXED",this.status.cache._dec.fixed);
+            this.$refs.scrolldiv.setMode(1);
           }
-        }
+        },
+        immediate:true,
       },
       "status.rawdata":{
         handler(new_,old_) {
-          if(old_===undefined || new_.length<=old_.length){
-            this._dec=new BrokenCodeText();
-            this._dec.update(new_);
-          }else{
-            this._dec.update(new_.slice(old_.length));
-          }
-          this.fixed=this._dec.fixed;
-          this.unfixed=this._dec.unfixed;
+          let dec=this.status.cache._dec;
+          this.fixedtext=dec.fixed;
+          this.unfixed=dec.unfixed;
         },
-        immediate:true,
+//        immediate:true,
         deep:true//暫定実装。パフォーマンスに影響があるのででっかい配列の場合は処理を切り替えて
       }
     },
     data() {
       return {
-        _dec:undefined,
+        fixedtext:[],
         unfixed:[],
       }
     },
+    mounted(){
+      let dec=this.status.cache._dec;
+      this.fixedtext=dec.fixed;
+      this.unfixed=dec.unfixed;
+      if(this.status.fixed){
+        this.$refs.scrolldiv.setMode(10,true);
+      }
+    },
     methods: {
-      toHex:toHex,
+      toHex:Functions.toHex,
       handleClick(){
         //クリックされた通知
         this.$emit("event-click",{sid:this.status.sid});
-        console.log("emitted");
       }
     },
     computed: {
-      formattedDate() {
-        return this.status.datetime.toLocaleDateString(navigator.language);
-      },
-      formattedTime() {
-        return this.status.datetime.toLocaleTimeString(navigator.language, { hour12: false ,hour: 'numeric', minute: '2-digit'});
-      }
+      formattedDate() {return Functions.formattedDate(this.status.datetime)},
+      formattedTime() {return Functions.formattedTime(this.status.datetime)},
     }
   }
 </script>

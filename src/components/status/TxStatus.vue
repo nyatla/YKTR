@@ -1,5 +1,5 @@
 <template>
-  <div class="rxdatainfo">
+  <div class="rxdatainfo" @click="handleClick">
     <div class="top">
       <div class="x_type">TX</div>
       <div class="d_type">DATA</div>
@@ -9,7 +9,12 @@
       </div>
       <div class="info">
         <div>{{ status.rawdata.length }} byte</div>
-        <AdaptiveScrollDiv :text="status.rawdata"></AdaptiveScrollDiv>
+        <AdaptiveScrollDiv ref="scrolldiv">
+          <div class="static_center">{{ infotext }}</div>
+          <!-- <template v-slot:contents>
+            <span>{{infotext}}</span>
+          </template> -->
+        </AdaptiveScrollDiv>
       </div>
     </div>
     <div class="sub">
@@ -19,6 +24,7 @@
 
 <script>
 
+import {Functions} from '../../assets/classes';
 import TextView from '../view/TextView.vue';
 import HexView from '../view/HexView.vue';
 import AdaptiveScrollDiv from '../ctrl/AdaptiveScrollDiv.vue';
@@ -38,27 +44,42 @@ export default
         type:Object,
         default:undefined        
       },
-      info:{
-        line1:String,
-        line2:String,
-      }
+      //暫定コンテンツ
+      info:undefined,
     },
     data() {
       return {
         active_tab:"text",
         date: new Date(),
-        closed: false
+        infotext:"",
       }
     },
+    watch:{
+      "status.fixed":{
+        handler(new_,old_){
+          if(new_===true && old_===false){
+            this.$refs.scrolldiv.setMode(1);
+          }
+        }
+      },
+      "info":{
+        handler(new_,old_){
+          this.infotext=new_.message;
+          console.log(this.infotext);
+        },
+        deep:true
+
+      }
+    },    
     methods: {
+      handleClick(){
+        //クリックされた通知
+        this.$emit("event-click",{sid:this.status.sid});
+      }      
     },
     computed: {
-      formattedDate() {
-        return this.status.datetime.toLocaleDateString(navigator.language);
-      },
-      formattedTime() {
-        return this.status.datetime.toLocaleTimeString(navigator.language, { hour12: false ,hour: 'numeric', minute: '2-digit'});
-      }
+      formattedDate() {return Functions.formattedDate(this.status.datetime)},
+      formattedTime() {return Functions.formattedTime(this.status.datetime)},
     }
   }
 </script>
@@ -73,6 +94,7 @@ export default
 
   .top {
     >.x_type {
+      
       background-color: @TX_LABEL_BG;
       color: @TX_LABEL_TXT;
     }

@@ -15,19 +15,21 @@ export default {
         speed:{
             type: Number,
             default: 1
-        }
-        
+        },
     },
     data() {
         return {
             offset: 0,
-            mode:0,//0:右端まで表示。//1右端を表示し終わったら左端から標示
+            /**
+             * 0:左詰めで右端まで表示。溢れたら左スクロール。
+             * 1:左スクロールして右端がスクロールアウトしたら左端から再表示して停止。
+             * 2:右端から左端迄を右端外から左スクロール。
+             * 10:左端固定
+             * 11:中央固定
+             * 12:右端固定
+             */
+             _mode:0,////
         }
-    },
-    watch: {
-        // '$slots.foo': function (v) {
-        //     this.updateTextWidth()
-        // }
     },
     mounted() {
         this.$nextTick(() => {
@@ -41,8 +43,20 @@ export default {
     },
     methods:
     {
-        fix(){//固定モードに移行する。
-            this.mode=1;
+        setMode(m,reset=false){
+            if(reset){
+                switch(m){
+                case 10:
+                case 0:
+                    this.offset=0;
+                    break;
+                case 1:
+                case 2:
+                    this.offset=this.$refs.text.scrollWidth;
+                    break;
+                }
+            }
+            this._mode=m;
         },
         _handleResize() {
 //            this.mode=0;
@@ -64,7 +78,7 @@ export default {
                 this.offset=0;
                 offset=0;
             }
-            switch(this.mode){
+            switch(this._mode){
                 case 0:{
                     let rpadding=textwidth-screenwidth+offset;//右端のhiddn幅
                     //左端優先で右端に揃える
@@ -92,8 +106,11 @@ export default {
                     }
                     break;
                 }
+                case 10:
+                    break;
 
             }
+//            console.log("mode",this._mode);
             this.animationFrame = requestAnimationFrame(this.scrollContent);
         },
     }

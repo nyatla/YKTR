@@ -58,13 +58,7 @@ export default
         type:Object,
         default:DEFAULT_SETTING
       },
-      info:{
-        type:Object,
-        default:{
-          preamble_cycle:4,
-          baud:100
-        }
-      }
+
     },
     data() {
       return {
@@ -75,10 +69,17 @@ export default
       }
     },
     methods: {
+      delayUpdate(){
+        this.txdata=utf8encoder.encode(this.textdata);
+      },
       clickTransmit(){
         if(this.txdata.length<1){
           return;
         }
+        if(this._txdata_delay_tid!=null){
+          clearTimeout(this._txdata_delay_tid);
+        }
+        this.delayUpdate();
         this.$emit("event-transmit",{data:this.txdata});
       },
       changeTab(num){
@@ -97,20 +98,11 @@ export default
           clearTimeout(this._txdata_delay_tid);
         }
         this._txdata_delay_tid=setTimeout(()=>{
-          this.txdata=utf8encoder.encode(this.textdata);
+          this.delayUpdate();
         },300);
       },
     },
     computed: {
-      // txdata()
-      // {
-      //   switch(this.active_tab){
-      //     case 0:
-      //       return this.txdata;
-      //     default:
-      //       throw new Error();
-      //   }
-      // },
       formattedDate() {
         return this.datetime.toLocaleDateString(navigator.language);
       },
@@ -121,7 +113,8 @@ export default
         if(this.txdata.length==0){
           return "0";
         }
-        let sec=(this.txdata.length*8+this.info.preamble_cycle*2+1)/this.info.baud;
+        console.log(this.setting);
+        let sec=(this.txdata.length*8+this.setting.preamble.cycle*2+1)/this.setting.baud;
         if(sec<0.1){
           return "<0.1";
         }else{
@@ -142,65 +135,13 @@ export default
 .txinputwindow {
   .modalwindow;
   background-color: @TX_BG;
-
   .top {
     display: flex;
-    >.label {
-      border: black 1px solid;
-      height: 2rem;
-      font-weight: bolder;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
     >.x_type {
-      .label;
-      width: 2rem;
-      min-width: 2rem;      
       background-color: @TX_LABEL_BG;
       color: @TX_LABEL_TXT;
     }
-    >.d_type {
-      margin-left: 0.25rem;
-      .label;
-      width: 4rem;
-      min-width: 4rem;      
-    }
-    >.datetime {
-      margin-left: 0.25rem;
-
-      >* {
-        width: 5rem;
-      }
-
-      >:nth-child(1) {
-        font-size: 0.5rem;
-      }
-
-      >:nth-child(2) {
-        font-family: sans-serif monospace;
-        margin-top: 0.0rem;
-        font-size: 1.3rem;
-        font-weight: bold;
-      }
-    }
-
-    >.info {
-      margin-left: auto;
-      margin-right: 0;
-      text-align: right;
-
-      >:nth-child(1) {
-        font-size: 0.5rem;
-      }
-
-      >:nth-child(2) {
-        margin-top: 0.0rem;
-        font-size: 1.3rem;
-      }
-    }
-  }
+  }  
   .base {
     box-sizing: border-box;
     background-color: white;

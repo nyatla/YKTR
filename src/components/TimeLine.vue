@@ -4,9 +4,9 @@
       <StatusDashboard ref="dashboardRef" :setting="setting" :activity_time_text="activity_time_text"></StatusDashboard>
     </div>
     <ul class="status-ul">
-        <li v-for="(status, index) in statuses" :key="index">
+        <li v-for="(status, index) in statuses" :key="status.sid">
           <RxStatus v-if="status.type == 'rx'" :status="status" @event-click="OnRxClick"></RxStatus>
-          <TxStatus v-if="status.type == 'tx'" :status="status" @event-click="OnTxClick"></TxStatus>
+          <TxStatus v-if="status.type == 'tx'" :info="active_tx_info" :status="status" @event-click="OnTxClick"></TxStatus>
         </li>
     </ul>
     <div class="footer_shadow"></div>
@@ -16,6 +16,9 @@
     </div>
     <ModalFrame v-if="modal=='rx'">
       <RxResultWindow  :status="selected_rx_status" @event-close="OnModalClose"></RxResultWindow>
+    </ModalFrame>
+    <ModalFrame v-if="modal=='tx'">
+      <TxResultWindow  :status="selected_tx_status" @event-close="OnModalClose"></TxResultWindow>
     </ModalFrame>
     <ModalFrame v-if="modal=='newtx'">
       <TxInputWindow  :setting="setting" @event-transmit="OnTransmit" @event-close="OnModalClose"></TxInputWindow>
@@ -34,6 +37,7 @@ import RxStatus from './status/RxStatus.vue';
 import TxStatus from './status/TxStatus.vue';
 import StatusDashboard from './StatusDashboard.vue';
 import RxResultWindow from './window/RxResultWindow.vue';
+import TxResultWindow from './window/TxResultWindow.vue';
 import TxInputWindow from './window/TxInputWindow.vue';
 import ModalFrame from './ctrl/ModalFrame.vue';
 
@@ -93,6 +97,7 @@ export default {
     TxStatus,
     StatusDashboard,
     RxResultWindow,
+    TxResultWindow,
     TxInputWindow,
     ModalFrame
   },
@@ -132,20 +137,11 @@ export default {
     let _t = this;
     const tbsk=this.tbsk;
     const setting=this.setting;
-    let tone;
-    switch(setting.tone[0]){
-    case 'SIN':
-      tone=new tbsk.SinTone(setting.tone[1].points,setting.tone[1].cycle);
-      break;
-    case 'XPSK':
-      tone=new tbsk.XPskSinTone(setting.tone[1].points,setting.tone[1].cycle,setting.tone[1].div);
-      break;
-    default:
-      throw new Error("Invalid tone",tone);
-    }
-    console.log(setting.frequency[1]["freq"],tone);
-    let socket = new this.tbsk.misc.TbskSocket({
-      carrier: setting.frequency[1]["freq"],
+    let tone=setting.tone.createInstance(tbsk);
+
+    
+    let socket = new tbsk.misc.TbskSocket({
+      carrier: setting.frequency.freq,
       tone:tone,
       encoding: "bin" 
     });
@@ -169,18 +165,8 @@ export default {
     this._stopwatch=stopwatch;
     this._socket = socket;
 
-    {
-      for(let i=0;i<3;i++){
-        let rs=this.status_builder.newRx();
-        this.selected_sid = rs.sid;
-        this.statuses.unshift(rs);
-        for(let i of [56, 58, 57, 2, 0x88, 88, 5, 8, 0xe3, 0x81, 0x82, 56, 56, 56, 56, 56, 56, 56, 66, 24, 58, 56]){
-          rs.rawdata.push(i);
-        }
-        rs.fixed=true;
-        this.active_rx_sid=undefined;
-      }
-    }
+
+    
 
   },
   created() {
@@ -194,18 +180,26 @@ export default {
   },
   computed:{
     selected_rx_status(){
-      console.log(this.statuses);
-      assert(this.selected_sid!=undefined && this.statuses[this.selected_sid].type=="rx");
-      return this.statuses[this.selected_sid];
+      let status = this.statuses.find(item => item.sid == this.selected_sid);
+      assert(this.selected_sid!=undefined && status.type=="rx");
+      return status;
+    },
+    selected_tx_status(){
+      let status = this.statuses.find(item => item.sid == this.selected_sid);
+      assert(this.selected_sid!=undefined && status.type=="tx");
+      return status;
     }
   },
   methods: {
     OnRxClick(event){
       this.selected_sid=event.sid;
       this.modal="rx";
+      console.log("selected",event);
     },
     OnTxClick(event){
-
+      this.selected_sid=event.sid;
+      this.modal="tx";
+      console.log("selected",event);
     },
     OnNewTxClick(event){
       this.modal="newtx";
@@ -222,17 +216,19 @@ export default {
       this.active_tx_info.message="Modulating";
       this._socket.send(ts.rawdata);
       this.modal="";
+      console.log(this.active_tx_info);
     },
     async OnModalClose(event){
       this.modal="";
     },
     sendstart(event){
-      let status = this.statuses.find(item => item.sid == this.active_tx_sid);
-      this.active_tx_info.message+="-> Transmiting";//微妙。
+//      let status = this.statuses.find(item => item.sid == this.active_tx_sid);
+      this.active_tx_info.message="Transmiting";//微妙。
     },
     sendcompleted(event){
       let status = this.statuses.find(item => item.sid == this.active_tx_sid);
-      this.active_tx_info.message+="-> Completed";//微妙。
+      this.active_tx_info.message="Completed";//微妙。
+      status.fixed=true;
     },
     async close() {
       this.modal="";//modalのクローズ
@@ -246,16 +242,17 @@ export default {
       console.log("detected",event.id);
       let rs=this.status_builder.newRx();
       this.active_rx_sid = rs.sid;
-
       this.statuses.unshift(rs);
     },
     // eslint-disable-next-line no-unused-vars
     message(event) {
       let status = this.statuses.find(item => item.sid == this.active_rx_sid);
+      let n=[];
       for(let i of event.data){
         status.rawdata.push(i);
+        n.push(i);
       }
-      console.log(event.data);
+      status.cache._dec.update(n);
     },
     // eslint-disable-next-line no-unused-vars
     lost(event) {

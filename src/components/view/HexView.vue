@@ -22,7 +22,7 @@ export default
     components: {
     },    
     props: {
-      rawdata: Array
+      rawdata: Array|Uint8Array
     },
     data() {
       return {

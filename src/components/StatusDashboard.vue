@@ -9,7 +9,7 @@
           <div>{{activity_time_text}}</div>
         </div>
         <div class="info">
-          <div class="line1">CARRIER {{ setting.frequency[1]["freq"] }} Hz - {{ticks}} Ticks TBSK Modulation</div>
+          <div class="line1">CARRIER {{ setting.frequency.freq }} Hz - {{ticks}} Ticks TBSK Modulation</div>
           <div class="volume">
             <div :style="metor"><!--metor --></div>
           </div>
@@ -59,8 +59,7 @@ export default
   },
   computed: {
     ticks(){
-      let p=this.setting.tone[1];
-      return p["points"]*p["cycle"];
+      return this.setting.tone.ticks;
     }
   }
 }

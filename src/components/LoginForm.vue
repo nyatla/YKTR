@@ -15,12 +15,12 @@
             <div class="sub">
               <label>Frquency</label>
               <div class="subselect">
-                <TileSelect :name="'freqs_select'" :items="default_setting.frequency.freqs" :defaultSelectedIndex="freqs_select" @event-selected="OnChangeModulationParam"></TileSelect>
+                <TileSelect :name="'freqs_select'" :items="freqTabs" :defaultSelectedIndex="freqs_select" @event-selected="OnChangeModulationParam"></TileSelect>
               </div>
               <label>Tone</label>
               <div>
                 <div class="subselect">
-                  <TileSelect :name="'tones_select'" :items="tones" :defaultSelectedIndex="tones_select" @event-selected="OnChangeModulationParam">
+                  <TileSelect :name="'tones_select'" :items="toneTabs" :defaultSelectedIndex="tones_select" @event-selected="OnChangeModulationParam">
                   </TileSelect>
                 </div>
                 <div class="tone_params">
@@ -32,11 +32,11 @@
                     </tr>
                     <tr>
                       <td>
-                        <IntegerInput :name="'tone_params_sin_points'" :max="1000" :min="10" :initValue="tones[0][1]['points']" @event-change="OnChangeModulationParam"></IntegerInput>
+                        <IntegerInput :name="'tone_params_sin_points'" :max="1000" :min="10" :initValue="tones[0].points" @event-change="OnChangeModulationParam"></IntegerInput>
                       </td>
                       <td>x</td>
                       <td>
-                        <IntegerInput :name="'tone_params_sin_cycle'" :max="100" :min="1" :initValue="tones[0][1]['cycle']" @event-change="OnChangeModulationParam"></IntegerInput>
+                        <IntegerInput :name="'tone_params_sin_cycle'" :max="100" :min="1" :initValue="tones[0].cycle" @event-change="OnChangeModulationParam"></IntegerInput>
                       </td>
                     </tr>
                   </table>
@@ -49,14 +49,14 @@
                     </tr>
                     <tr>
                       <td>
-                        <IntegerInput :name="'tone_params_xpsk_points'" :max="1000" :min="10" :initValue="tones[1][1]['points']" @event-change="OnChangeModulationParam"></IntegerInput>
+                        <IntegerInput :name="'tone_params_xpsk_points'" :max="1000" :min="10" :initValue="tones[1].points" @event-change="OnChangeModulationParam"></IntegerInput>
                       </td>
                       <td>x</td>
                       <td>
-                        <IntegerInput :name="'tone_params_xpsk_cycle'" :max="100" :min="1" :initValue="tones[1][1]['cycle']" @event-change="OnChangeModulationParam"></IntegerInput>
+                        <IntegerInput :name="'tone_params_xpsk_cycle'" :max="100" :min="1" :initValue="tones[1].cycle" @event-change="OnChangeModulationParam"></IntegerInput>
                       </td>
                       <td>
-                        <IntegerInput :name="'tone_params_xpsk_div'" :max="32" :min="1" :initValue="tones[1][1]['div']" @event-change="OnChangeModulationParam"></IntegerInput>
+                        <IntegerInput :name="'tone_params_xpsk_div'" :max="32" :min="1" :initValue="tones[1].div" @event-change="OnChangeModulationParam"></IntegerInput>
                       </td>
                     </tr>
                   </table>
@@ -73,23 +73,20 @@
 </template>
   
 <script>
-import {clone} from '../assets/classes';
+import {FrequencySpec,SinToneSpec,XpskSinToneSpec,ModulationSpec} from '../assets/classes';
 import TileSelect from './ctrl/TileSelect.vue';
 import IntegerInput from './ctrl/IntegerInput.vue';
 
+//永続データ
 const FREQUENCY_LIST=
 [
-  ['8kHz', { freq: 8000 }],
-  ['16kHz', { freq: 16000 }],
-  ['24kHz', { freq: 24000 }],
-  ['32kHz', { freq: 32000 }],
-  ['48kHz', { freq: 48000 }]
+  new FrequencySpec(8000),
+  new FrequencySpec(16000),
+  new FrequencySpec(24000),
+  new FrequencySpec(32000),
+  new FrequencySpec(48000),
 ];
-const TONE_LIST=
-[
-  ['SIN', { points: 10, cycle: 10 }],
-  ['XPSK', { points: 10, cycle: 10, div: 8 }],
-];
+
 
 
 
@@ -100,27 +97,61 @@ export default {
     IntegerInput
   },
   props: {
-    default_setting: {
-      type: Object,
-      default: {
-        frequency:{
-          freqs:FREQUENCY_LIST,
-          selected:0
-        },
-        tone:{
-          tones:TONE_LIST,
-          selected:0
-        }
-      }
-    },
+    current_setting:{
+      type:Object,
+      default:undefined
+    }
   },
   data() {
     return {
       show_mod_setting: false,
-      freqs_select: this.default_setting.frequency.selected,
-      tones: clone(this.default_setting.tone.tones),
-      tones_select: this.default_setting.tone.selected,
+      freqs:FREQUENCY_LIST,
+      freqs_select:1,
+      tones:undefined,
+      tones_select:1,
     }
+  },
+  beforeMount(){
+    this.tones=[
+        new SinToneSpec(10,10),
+        new XpskSinToneSpec(10,10),
+    ];
+    if(this.current_setting){
+      //freq_select
+      const fl=FREQUENCY_LIST;
+      for(let i=0;i<fl.length;i++){
+        if(fl[i].name==this.current_setting.frequency.name){
+          this.freqs_select=i;
+          break;
+        }
+      }
+      //tone list
+      let current_tone=this.current_setting.tone;
+      switch(current_tone.name){
+      case "SIN":
+        this.tones[0]=current_tone;
+        break;
+      case "XPSK":
+        this.tones[1]=current_tone;
+          break;
+      default:
+        throw new Error();
+      }
+      const tl=this.tones;
+      for(let i=0;i<tl.length;i++){
+        if(tl[i].name==this.current_setting.tone.name){
+          this.tones_select=i;
+          break;
+        }
+      }
+    }else{
+      //tone list
+      this.tones=[
+        new SinToneSpec(10,10),
+        new XpskSinToneSpec(10,10),
+      ];
+    }
+    console.log("init",this.tones);
   },
   methods: {
     freqSelected() {
@@ -136,42 +167,53 @@ export default {
         this.tones_select=event.index;
         break;
       case "tone_params_sin_points":
-        console.log("NEEW");
-        this.tones[0][1]['points']=event.value;
+        this.tones[0].points=event.value;
         break;
       case "tone_params_sin_cycle":
-        this.tones[0][1]['cycle']=event.value;
+        this.tones[0].cycle=event.value;
         break;
       case "tone_params_xpsk_points":
-        this.tones[1][1]['points']=event.value;
+        this.tones[1].points=event.value;
         break;
       case "tone_params_xpsk_cycle":
-        this.tones[1][1]['cycle']=event.value;
+        this.tones[1].cycle=event.value;
         break;
       case "tone_params_xpsk_div":
-        this.tones[1][1]['div']=event.value;
+        this.tones[1].div=event.value;
         break;        
       }
     },
     go() {
       this.$emit('event-go',{
         name:"",
-        setting:{
-          preamble:{
-            cycle:4
-          },
-          frequency:this.default_setting.frequency.freqs[this.freqs_select],
-          tone:this.tones[this.tones_select],
-        }
+        setting:new ModulationSpec(
+          4,
+          this.freqs[this.freqs_select],
+          this.tones[this.tones_select]
+        )
       });
     }
   },
   computed:{
+    toneTabs(){
+      let r=[];
+      for(let i of this.tones){
+        r.push(i.name);
+      }
+      return r;
+    },
+    freqTabs(){
+      let r=[];
+      for(let i of this.freqs){
+        r.push(i.name);
+      }
+      return r;
+    },
     summary(){
-      let freq= this.default_setting.frequency.freqs[this.freqs_select];
+      let freq= this.freqs[this.freqs_select];
       let tone= this.tones[this.tones_select];
-      let ticks=tone[1].points*tone[1].cycle;
-      return `TBSK ${freq[1].freq}Hz ${ticks}Ticks ${tone[0]} Tone`;
+      let ticks=tone.points*tone.cycle;
+      return `TBSK ${freq.freq}Hz ${ticks}Ticks ${tone.name} Tone`;
     },
   }
 }
@@ -185,7 +227,7 @@ export default {
   padding: .25rem;
   position: relative;
   top:25vh;
-    height:16.5rem;
+  min-height:16.5rem;
   >hr {
     height: 1px;
     background-color: black;

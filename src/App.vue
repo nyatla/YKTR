@@ -7,7 +7,7 @@
   <App_Debug v-if="false"/>
   <div class="vfullscreen" v-if="state=='login'" >
     <div>
-      <LoginForm @event-go="OnGo"></LoginForm>
+      <LoginForm @event-go="OnGo" :current_setting="setting"></LoginForm>
     </div>
   </div>
   <div class="vfullscreen" v-if="state=='rawpacket'" >
@@ -27,7 +27,7 @@ import TimeLine from './components/TimeLine.vue'
 
 
 
-import {assert,DEFAULT_SETTING} from './assets/classes'
+import {assert} from './assets/classes'
 import App_Debug from './App_Debug.vue'
 import {TBSKmodemJS} from "tbskmodem-js"
 
@@ -43,7 +43,7 @@ export default {
   data() {
     return {
       tbsk:undefined,
-      setting:DEFAULT_SETTING,
+      setting:undefined,
       state:"login",
     }
   },  
@@ -52,6 +52,7 @@ export default {
       console.log(event);
       assert(this.state=="login");
       this.setting=event.setting;
+      console.log("setting",this.setting);
       this.state="wait_for_login";
       if(this.tbsk===undefined){
         let tbsk=await TBSKmodemJS.load();
