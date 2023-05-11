@@ -1,33 +1,32 @@
 <template>
-  
-  <!-- <LoginForm
-    msg="Welcome to Your Vue.js App"
-    @login-complete="onLoginComplete"
-  /> -->
   <App_Debug v-if="false"/>
   <div class="vfullscreen" v-if="state=='login'" >
     <div>
-      <LoginForm @event-go="OnGo" :current_setting="setting"></LoginForm>
+      <LoginForm @event-go="OnGo" :application="application"></LoginForm>
     </div>
   </div>
   <div class="vfullscreen" v-if="state=='rawpacket'" >
     <div>
-      <TimeLine  :setting="setting" :tbsk="tbsk" @event-close="handleTimelineClose" />
+      <TimeLine :application="application" :tbsk="tbsk" @event-close="handleTimelineClose" />
     </div>
   </div>
-
-
-
-
 </template>
-
 <script>
+
+const VERSION={
+  name:"YKTR",
+  major:0,
+  miner:1,
+  toString:()=>{
+    return `${this.name}/${this.major}.${this.miner}`;
+  }
+};
+
+
+
 import LoginForm from './components/LoginForm.vue'
 import TimeLine from './components/TimeLine.vue'
-
-
-
-import {assert} from './assets/classes'
+import {assert,Application} from './assets/classes'
 import App_Debug from './App_Debug.vue'
 import {TBSKmodemJS} from "tbskmodem-js"
 
@@ -39,11 +38,16 @@ export default {
     App_Debug,
 
   },
-
+  props:{
+    application:{
+      type:Object,
+      default:new Application()
+    }
+  },
   data() {
     return {
       tbsk:undefined,
-      setting:undefined,
+//      setting:this.application.setting,
       state:"login",
     }
   },  
@@ -51,7 +55,7 @@ export default {
     async OnGo(event){
 //      console.log(event);
       assert(this.state=="login");
-      this.setting=event.setting;
+      this.application.current_setting=event.setting;
 //      console.log("setting",this.setting);
       this.state="wait_for_login";
       if(this.tbsk===undefined){
@@ -70,11 +74,11 @@ export default {
 </script>
 
 <style lang="less">
+@import "./assets/global.less";
+
 .area{
   padding:0 2.5vw;
   height: 100vh;
-  // min-width:20rem;
-  // max-width:40rem;
 }
 .vcenter{
   .area;
@@ -82,9 +86,7 @@ export default {
   justify-content: center; /* 横方向（X軸）の中央揃え */
   align-items: center; /* 縦方向（Y軸）の中央揃え */
   >:nth-child(1){
-    width:95vw;
-    min-width:20rem;
-    max-width:40rem;
+    .inherit_app_setting;
   }
 }
 .vfullscreen{
@@ -92,9 +94,7 @@ export default {
   display: flex;
   justify-content: center; /* 横方向（X軸）の中央揃え */
   >:nth-child(1){
-    width:95vw;
-    min-width:20rem;
-    max-width:40rem;
+    .inherit_app_setting;
   }
 }
 

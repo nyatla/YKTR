@@ -1,75 +1,80 @@
 <template>
-  <div class="main">
-    <div class="title">TBSK Transceiver</div>
-    <hr />
-    <ul class="settings">
-      <li>
-        <label>Application Mode</label>
-        <button style="border: none;" class="setting_btn">Raw packet capture</button>
-      </li>
-      <li>
-        <label>Modulation Setting</label>
-        <button class="setting_btn" @click="show_mod_setting = !show_mod_setting">{{ summary }}</button>
-        <div style="" v-if="show_mod_setting">
-          <div>
-            <div class="sub">
-              <label>Frquency</label>
-              <div class="subselect">
-                <TileSelect :name="'freqs_select'" :items="freqTabs" :defaultSelectedIndex="freqs_select" @event-selected="OnChangeModulationParam"></TileSelect>
-              </div>
-              <label>Tone</label>
-              <div>
+  <div class="screen">
+    <h1>TBSK Transceiver</h1>
+    <hr/>
+    <div class="main">
+      <div class="title">Set Application Type</div>
+      <hr />
+      <ul class="settings">
+        <li>
+          <label>Application Mode</label>
+          <button style="border: none;" class="setting_btn">Raw packet capture</button>
+        </li>
+        <li>
+          <label>Modulation Setting</label>
+          <button class="setting_btn" @click="show_mod_setting = !show_mod_setting">{{ summary }}</button>
+          <div style="" v-if="show_mod_setting">
+            <div>
+              <div class="sub">
+                <label>Frquency</label>
                 <div class="subselect">
-                  <TileSelect :name="'tones_select'" :items="toneTabs" :defaultSelectedIndex="tones_select" @event-selected="OnChangeModulationParam">
-                  </TileSelect>
+                  <TileSelect :name="'freqs_select'" :items="freqTabs" :defaultSelectedIndex="freqs_select" @event-selected="OnChangeModulationParam"></TileSelect>
                 </div>
-                <div class="tone_params">
-                  <table v-if="tones_select == 0">
-                    <tr>
-                      <td>points</td>
-                      <td></td>
-                      <td>cycle</td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <IntegerInput :name="'tone_params_sin_points'" :max="1000" :min="10" :initValue="tones[0].points" @event-change="OnChangeModulationParam"></IntegerInput>
-                      </td>
-                      <td>x</td>
-                      <td>
-                        <IntegerInput :name="'tone_params_sin_cycle'" :max="100" :min="1" :initValue="tones[0].cycle" @event-change="OnChangeModulationParam"></IntegerInput>
-                      </td>
-                    </tr>
-                  </table>
-                  <table v-if="tones_select == 1">
-                    <tr>
-                      <td>points</td>
-                      <td></td>
-                      <td>cycle</td>
-                      <td>div</td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <IntegerInput :name="'tone_params_xpsk_points'" :max="1000" :min="10" :initValue="tones[1].points" @event-change="OnChangeModulationParam"></IntegerInput>
-                      </td>
-                      <td>x</td>
-                      <td>
-                        <IntegerInput :name="'tone_params_xpsk_cycle'" :max="100" :min="1" :initValue="tones[1].cycle" @event-change="OnChangeModulationParam"></IntegerInput>
-                      </td>
-                      <td>
-                        <IntegerInput :name="'tone_params_xpsk_div'" :max="32" :min="1" :initValue="tones[1].div" @event-change="OnChangeModulationParam"></IntegerInput>
-                      </td>
-                    </tr>
-                  </table>
+                <label>Tone</label>
+                <div>
+                  <div class="subselect">
+                    <TileSelect :name="'tones_select'" :items="toneTabs" :defaultSelectedIndex="tones_select" @event-selected="OnChangeModulationParam">
+                    </TileSelect>
+                  </div>
+                  <div class="tone_params">
+                    <table v-if="tones_select == 0">
+                      <tr>
+                        <td>points</td>
+                        <td></td>
+                        <td>cycle</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <IntegerInput :name="'tone_params_sin_points'" :max="1000" :min="10" :initValue="tones[0].points" @event-change="OnChangeModulationParam"></IntegerInput>
+                        </td>
+                        <td>x</td>
+                        <td>
+                          <IntegerInput :name="'tone_params_sin_cycle'" :max="100" :min="1" :initValue="tones[0].cycle" @event-change="OnChangeModulationParam"></IntegerInput>
+                        </td>
+                      </tr>
+                    </table>
+                    <table v-if="tones_select == 1">
+                      <tr>
+                        <td>points</td>
+                        <td></td>
+                        <td>cycle</td>
+                        <td>div</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <IntegerInput :name="'tone_params_xpsk_points'" :max="1000" :min="10" :initValue="tones[1].points" @event-change="OnChangeModulationParam"></IntegerInput>
+                        </td>
+                        <td>x</td>
+                        <td>
+                          <IntegerInput :name="'tone_params_xpsk_cycle'" :max="100" :min="1" :initValue="tones[1].cycle" @event-change="OnChangeModulationParam"></IntegerInput>
+                        </td>
+                        <td>
+                          <IntegerInput :name="'tone_params_xpsk_div'" :max="32" :min="1" :initValue="tones[1].div" @event-change="OnChangeModulationParam"></IntegerInput>
+                        </td>
+                      </tr>
+                    </table>
 
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </li>
-    </ul>
-    <button class="go" @click="go">Go!</button>
+        </li>
+      </ul>
+      <button class="go" @click="go">Go!</button>
+    </div>
   </div>
+
 </template>
   
 <script>
@@ -97,9 +102,9 @@ export default {
     IntegerInput
   },
   props: {
-    current_setting:{
+    application:{
       type:Object,
-      default:undefined
+      required:true,
     }
   },
   data() {
@@ -116,17 +121,18 @@ export default {
         new SinToneSpec(10,10),
         new XpskSinToneSpec(10,10),
     ];
-    if(this.current_setting){
+    const current_setting=this.application.current_setting;
+    if(current_setting){
       //freq_select
       const fl=FREQUENCY_LIST;
       for(let i=0;i<fl.length;i++){
-        if(fl[i].name==this.current_setting.frequency.name){
+        if(fl[i].name==current_setting.frequency.name){
           this.freqs_select=i;
           break;
         }
       }
       //tone list
-      let current_tone=this.current_setting.tone;
+      let current_tone=current_setting.tone;
       switch(current_tone.name){
       case "SIN":
         this.tones[0]=current_tone;
@@ -139,7 +145,7 @@ export default {
       }
       const tl=this.tones;
       for(let i=0;i<tl.length;i++){
-        if(tl[i].name==this.current_setting.tone.name){
+        if(tl[i].name==current_setting.tone.name){
           this.tones_select=i;
           break;
         }
@@ -222,10 +228,13 @@ export default {
 <style lang="less" scoped>
 @import "../assets/global.less";
 
+.screen{
+}
 .main {
+  .inherit_app_setting;
   background-color: @LOGIN_BG;
   padding: .25rem;
-  position: relative;
+  position: absolute;
   top:25vh;
   min-height:16.5rem;
   >hr {
@@ -233,8 +242,6 @@ export default {
     background-color: black;
     border: none;
   }
-
-
   >.title {
     font-weight: bolder;
     padding: 0;

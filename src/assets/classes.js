@@ -69,7 +69,7 @@ class SinToneSpec extends ToneSpec{
 class XpskSinToneSpec extends ToneSpec{
   constructor(points=10,cycle=10,div=8){
     super("XPSK",points,cycle);
-    this.div=8;
+    this.div=div;
   }
   createInstance(tbsk){
     return new tbsk.XPskSinTone(this.points,this.cycle,this.div);
@@ -95,10 +95,20 @@ class ModulationSpec
     return this.frequency.freq/(this.tone.ticks);
   }
 }
-
 const DEFAULT_SETTING=new ModulationSpec(4,new FrequencySpec(8000),new SinToneSpec());
 
 
+/**
+ * シリアライズ可能なアプリケーションデータ
+ */
+class Application{
+  constructor(){
+    this.version;
+    this.current_setting=undefined;
+    console.log("Application created");
+//    this._statuses;
+  }
+}
 
 class StatusData{
   constructor(sid,type){
@@ -127,8 +137,6 @@ class TxStatusData extends StatusData{
   }
 }
 
-
-
   
 class StatusDataBuilder{
     constructor(){
@@ -141,6 +149,13 @@ class StatusDataBuilder{
       return new TxStatusData(this._sid_counter++);
   }    
 }
+
+
+
+
+
+
+
 
 //ダミーデータ生成インスタンス
 class DummyData{
@@ -210,6 +225,7 @@ class BrokenCodeText{
   }
 
 export {
+    Application,
     assert,
     clone,
     toHex,

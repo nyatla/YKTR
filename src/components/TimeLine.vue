@@ -1,5 +1,5 @@
 <template>
-  <div class="timeline" v-if="!closed">
+  <div class="screen" v-if="!closed">
     <div class="top_panel">
       <StatusDashboard ref="dashboardRef" :setting="setting" :activity_time_text="activity_time_text"></StatusDashboard>
     </div>
@@ -103,9 +103,9 @@ export default {
   },
   props: {
     
-    setting:{
+    application:{
       type:Object,
-      default:DEFAULT_SETTING
+      required:true
     },
     tbsk: Object,//TBSKmodemJSインスタンス
   },
@@ -120,6 +120,7 @@ export default {
       modal:undefined,
       activity_time_text:"",
       title: "TBSK Audio Terminal",
+      setting:this.application.current_setting,
       statuses: [
       ],
       selected_sid:undefined, //操作対象のsid
@@ -286,14 +287,9 @@ export default {
 <style lang="less" scoped>
   @import "../assets/global.less";
 
-.inherit_app_setting{
-  //ここの設定はApp.vueからコピーして
-  width:95vw;
-  min-width:20rem;
-  max-width:40rem;
 
-}
-.timeline{
+  
+.screen{
 }
 
 .status-ul {
