@@ -12,6 +12,9 @@
         <AdaptiveScrollDiv ref="scrolldiv">
           <template v-slot:contents>
             <div v-if="mode==0" class="statictext">{{ static_message }}</div>
+            <div v-if="mode==1" class="txtext">
+              <span v-for="(c, i) in static_message" v-bind:key="i" :class="{ 'hexascii': (typeof c) != 'string' }">{{ ((typeof c) == 'string') ? c : toHex(c, 2) }}</span>            
+            </div>
           </template>          
         </AdaptiveScrollDiv>
       </div>
@@ -23,7 +26,7 @@
 
 <script>
 
-import {dbg,Functions} from '../../assets/classes';
+import {dbg,Functions,BrokenCodeText} from '../../assets/classes';
 import TextView from '../view/TextView.vue';
 import HexView from '../view/HexView.vue';
 import AdaptiveScrollDiv from '../ctrl/AdaptiveScrollDiv.vue';
@@ -55,19 +58,23 @@ export default
       this.$refs.scrolldiv.setMode(11,true);
     },
     watch:{
-      "status.fixed":{
-        handler(new_,old_){
-          if(new_===true && old_===false){
-            this.$refs.scrolldiv.setMode(1);
-          }
-        }
-      },
+      // "status.fixed":{
+      //   handler(new_,old_){
+      //     if(new_===true && old_===false){
+      //       this.$refs.scrolldiv.setMode(1);
+      //     }
+      //   }
+      // },
       "status.cache.mode":{
         handler(new_,old_){
-          if(this.status.fixed){
-            return;
-          }
+          // if(this.status.fixed){
+          //   return;
+          // }
           this.mode=new_;
+          if(this.mode==1){
+            console.log("mode change");
+            this.$refs.scrolldiv.setMode(1,true);
+          }
         },
       },
       "status.cache.message":{
@@ -98,10 +105,26 @@ export default
   .statusframe;
   background-color: @TX_BG;
 
-  .statictext{
-    display: inline-block;
-    text-align:center;
+  .info{
+    .statictext{
+      display: inline-block;
+      text-align:center;
+    }
+    .hexascii{
+      display: inline-block;
+      text-align: center;
+      font-size: 0.8rem;
+      margin:0 0.1rem;
+      background-color: @light-gray;
+      width:1.2rem;
+    }
+
+    .txtext{
+      display: inline-block;
+    }
+
   }
+
   .top {
     >.x_type {
       

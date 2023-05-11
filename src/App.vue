@@ -49,10 +49,10 @@ export default {
   },  
   methods: {
     async OnGo(event){
-      console.log(event);
+//      console.log(event);
       assert(this.state=="login");
       this.setting=event.setting;
-      console.log("setting",this.setting);
+//      console.log("setting",this.setting);
       this.state="wait_for_login";
       if(this.tbsk===undefined){
         let tbsk=await TBSKmodemJS.load();
@@ -60,7 +60,7 @@ export default {
         this.tbsk=tbsk;
       }
       this.state="rawpacket";
-      console.log(this.state);
+//      console.log(this.state);
     },
     handleTimelineClose(event){
       this.state="login";

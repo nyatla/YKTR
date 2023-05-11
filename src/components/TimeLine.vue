@@ -32,7 +32,7 @@
 
   
 <script>
-import {DEFAULT_SETTING,StatusDataBuilder,assert,dbg} from "../assets/classes"
+import {DEFAULT_SETTING,StatusDataBuilder,assert,BrokenCodeText} from "../assets/classes"
 import RxStatus from './status/RxStatus.vue';
 import TxStatus from './status/TxStatus.vue';
 import StatusDashboard from './StatusDashboard.vue';
@@ -224,8 +224,16 @@ export default {
     sendcompleted(event){
       let status = this.statuses.find(item => item.sid == this.active_tx_sid);
       status.cache.message="Completed";
+      //
+      let bct=new BrokenCodeText();
+      bct.update(status.rawdata);
+
+      let message=[...bct.fixed];
+      message.push(...bct.unfixed);
       setTimeout(()=>{
+        status.cache.message=message;
         status.fixed=true;
+        status.cache.mode=1;
       },500);
     },
     async close() {

@@ -96,8 +96,9 @@ export default {
                 this.offset=Math.floor((screenwidth-textwidth)*0.5);
                 return;
             }
-
             if(this._reset_requred){
+                this._reset_requred=false;
+
                 switch(this._mode){
                 //遷移系
                 case 0://右端固定
@@ -105,7 +106,7 @@ export default {
                     break;
                 case 1:
                 case 2:
-                    this.offset=textwidth;
+                    this.offset=screenwidth;//textwidth;
                     break;
                 }
             }

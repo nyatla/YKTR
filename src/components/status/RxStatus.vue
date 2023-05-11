@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import {BrokenCodeText,Functions,dbg} from '../../assets/classes';
+import {Functions,dbg} from '../../assets/classes';
 
 import TextView from '../view/TextView.vue';
 import HexView from '../view/HexView.vue';
