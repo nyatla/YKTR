@@ -26,7 +26,7 @@
 
 <script>
 
-import {dbg,Functions,BrokenCodeText} from '../../assets/classes';
+import {Functions} from '../../assets/classes';
 import TextView from '../view/TextView.vue';
 import HexView from '../view/HexView.vue';
 import AdaptiveScrollDiv from '../ctrl/AdaptiveScrollDiv.vue';
@@ -44,7 +44,7 @@ export default
     props: {
       status:{
         type:Object,
-        default:dbg.txDummyData(),        
+        default:undefined,        
       },
     },
     data() {
@@ -55,7 +55,13 @@ export default
       }
     },
     mounted(){
-      this.$refs.scrolldiv.setMode(11,true);
+      if(this.status.fixed){
+        this.$refs.scrolldiv.setMode(0,true);
+        this.static_message=this.status.cache.message;
+        this.mode=1;
+      }else{
+        this.$refs.scrolldiv.setMode(11,true);
+      }
     },
     watch:{
       // "status.fixed":{
@@ -109,6 +115,12 @@ export default
     .statictext{
       display: inline-block;
       text-align:center;
+      width:10rem;
+      font-size:.9rem;
+      margin:0;
+      padding:0;
+      border:1px solid;
+      font-weight: bold;
     }
     .hexascii{
       display: inline-block;

@@ -5,6 +5,7 @@ import vue from '@vitejs/plugin-vue'
 import wasm from 'vite-plugin-wasm'
 import path from 'path';
 export default defineConfig({
+  base: './',
   plugins: [
     vue(),
     {

@@ -32,7 +32,7 @@
 
   
 <script>
-import {DEFAULT_SETTING,StatusDataBuilder,assert,BrokenCodeText} from "../assets/classes"
+import {assert,BrokenCodeText} from "../assets/classes"
 import RxStatus from './status/RxStatus.vue';
 import TxStatus from './status/TxStatus.vue';
 import StatusDashboard from './StatusDashboard.vue';
@@ -113,7 +113,6 @@ export default {
 
   data() {
     return {
-      status_builder:new StatusDataBuilder(),
       _rms:0,
       _stopwatch:undefined,
       _timer:undefined,
@@ -121,8 +120,7 @@ export default {
       activity_time_text:"",
       title: "TBSK Audio Terminal",
       setting:this.application.current_setting,
-      statuses: [
-      ],
+      statuses:[],//watachに引っかけるためにapplicationと並列のリストにする。外部での配列操作はフックできない。
       selected_sid:undefined, //操作対象のsid
       active_rx_sid: undefined,//アクティブなRX
       active_tx_sid: undefined,//アクティブなRX
@@ -161,10 +159,10 @@ export default {
     },30);
     this._stopwatch=stopwatch;
     this._socket = socket;
-
-
-    
-
+    //アプリケーションデータから復帰
+    for(let i of this.application.statuses.items){
+      this.statuses.unshift(i);
+    }
   },
   created() {
 
@@ -177,17 +175,38 @@ export default {
   },
   computed:{
     selected_rx_status(){
-      let status = this.statuses.find(item => item.sid == this.selected_sid);
-      assert(this.selected_sid!=undefined && status.type=="rx");
+      let status = this.application.statuses.statusOfSid(this.selected_sid);
+      assert(status && status.type=="rx");
       return status;
     },
     selected_tx_status(){
-      let status = this.statuses.find(item => item.sid == this.selected_sid);
-      assert(this.selected_sid!=undefined && status.type=="tx");
+      let status = this.application.statuses.statusOfSid(this.selected_sid);
+      assert(status && status.type=="tx");
       return status;
     }
   },
   methods: {
+    _statusOfSid(sid,type=undefined){
+      let status = this.statuses.find(item => item.sid == sid);
+      if(status && (type===undefined || status.type==type)){
+        return status;
+      }
+      return undefined;
+    },
+    _addNewTx(data){
+      let ts=this.application.statuses.newTx(this.application.current_setting);
+      ts.rawdata=data;
+      ts.cache.mode=0;
+      ts.cache.message="Modulating";
+      this.statuses.unshift(ts);//表示にも書込み
+      return ts;
+    },
+    _addNewRx(data){
+      let ts=this.application.statuses.newRx(this.application.current_setting);
+      this.statuses.unshift(ts);//表示にも書込み
+      return ts;
+    },
+
     OnRxClick(event){
       this.selected_sid=event.sid;
       this.modal="rx";
@@ -205,13 +224,8 @@ export default {
       await this.close();
     },
     OnTransmit(event){
-      let data=event.data;
-      let ts=this.status_builder.newTx();
-      ts.rawdata=data;
-      ts.cache.mode=0;
-      ts.cache.message="Modulating";
+      let ts=this._addNewTx(event.data);
       this.active_tx_sid=ts.sid;
-      this.statuses.unshift(ts);
       this._socket.send(ts.rawdata);
       this.modal="";
     },
@@ -219,11 +233,11 @@ export default {
       this.modal="";
     },
     sendstart(event){
-      let status = this.statuses.find(item => item.sid == this.active_tx_sid);
+      let status = this._statusOfSid(this.active_tx_sid);
       status.cache.message="Transmiting";
     },
     sendcompleted(event){
-      let status = this.statuses.find(item => item.sid == this.active_tx_sid);
+      let status = this._statusOfSid(this.active_tx_sid);
       status.cache.message="Completed";
       //
       let bct=new BrokenCodeText();
@@ -247,13 +261,12 @@ export default {
     detected(event)
     {
       console.log("detected",event.id);
-      let rs=this.status_builder.newRx();
+      let rs=this._addNewRx();
       this.active_rx_sid = rs.sid;
-      this.statuses.unshift(rs);
     },
     // eslint-disable-next-line no-unused-vars
     message(event) {
-      let status = this.statuses.find(item => item.sid == this.active_rx_sid);
+      let status = this._statusOfSid(this.active_rx_sid);
       let n=[];
       for(let i of event.data){
         status.rawdata.push(i);
@@ -263,23 +276,10 @@ export default {
     },
     // eslint-disable-next-line no-unused-vars
     lost(event) {
-      let status = this.statuses.find(item => item.sid == this.active_rx_sid);
+      let status = this._statusOfSid(this.active_rx_sid);
       status.fixed=true;
       this.active_rx_sid=undefined;
-    },/*
-      send(){
-        //受信中なら閉じる
-        //送信ステータスを開く
-      },
-      send_close(force){
-        //送信ステータスを閉じる
-        //待機ステータスを開く
-      },*/
-    //アイドル状態にする
-    // idle(){
-    //   this.append("idle");
-    // }
-
+    },
   }
 }
 </script>

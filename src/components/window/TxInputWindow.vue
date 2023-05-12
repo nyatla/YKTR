@@ -5,7 +5,7 @@
       <div class="d_type">DATA</div>
       <div class="info">
         <div>Total <b>{{txdata.length}}</b> bytes, Estimated transmit time <b :style="{backgroundColor:estimateTime>60?'red':''}">{{estimateTime}}</b> sec.</div>
-        <div>Enter your message to transmit.</div>
+        <div>Enter message to transmit.</div>
       </div>
     </div>
     <hr />
@@ -32,8 +32,8 @@
       </ul>
     </div>
     <div class="footer">
-      <button v-bind:disabled="this.txdata.length==0" @click="clickTransmit">transmit</button>
-      <button @click="$emit('event-close')">close</button>
+      <button v-bind:disabled="this.txdata.length==0" @click="clickTransmit">Transmit</button>
+      <button @click="$emit('event-close')">Cancel</button>
     </div>
   </div>
 </template>

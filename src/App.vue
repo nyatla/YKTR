@@ -13,16 +13,8 @@
 </template>
 <script>
 
-const VERSION={
-  name:"YKTR",
-  major:0,
-  miner:1,
-  toString:()=>{
-    return `${this.name}/${this.major}.${this.miner}`;
-  }
-};
 
-
+import img_logo from '@/assets/icon256.png'
 
 import LoginForm from './components/LoginForm.vue'
 import TimeLine from './components/TimeLine.vue'
@@ -41,22 +33,25 @@ export default {
   props:{
     application:{
       type:Object,
-      default:new Application()
+      default:new Application(
+        {
+          imgs:{
+            logo:img_logo
+          }
+        }
+      )
     }
   },
   data() {
     return {
       tbsk:undefined,
-//      setting:this.application.setting,
       state:"login",
     }
   },  
   methods: {
     async OnGo(event){
-//      console.log(event);
       assert(this.state=="login");
       this.application.current_setting=event.setting;
-//      console.log("setting",this.setting);
       this.state="wait_for_login";
       if(this.tbsk===undefined){
         let tbsk=await TBSKmodemJS.load();

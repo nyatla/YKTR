@@ -8,8 +8,11 @@
         <div>{{ formattedTime }}</div>
       </div>
       <div class="info">
-        <div>{{ info.line1 }}</div>
-        <div>{{ status.rawdata.length }} bytes transmitted.</div>
+        <div>{{ line1 }}</div>
+        <div>
+          <span v-if="!status.fixed">Transmitting...</span>
+          <span v-if="status.fixed">{{ status.rawdata.length }} bytes transmitted.</span>          
+        </div>
       </div>
     </div>
     <hr />
@@ -28,13 +31,13 @@
       </ul>
     </div>
     <div class="footer">
-      <button @click="()=>{$emit('event-close')}">close</button>
+      <button @click="()=>{$emit('event-close')}">Close</button>
     </div>
   </div>
 </template>
 
 <script>
-import {dbg,Functions} from '../../assets/classes';
+import {Functions} from '../../assets/classes';
 
 import TextView from '../view/TextView.vue';
 import HexView from '../view/HexView.vue';
@@ -51,15 +54,8 @@ export default
     props: {
       status:{
         type:Object,
-        default:dbg.txDummyData(),
-      },      
-      info:{
-        type:Object,
-        default:{
-          line1:'LINE1',
-          line2:'LINE2'
-        },
-      }
+        default:undefined,
+      },
     },
     data() {
       return {
@@ -76,6 +72,10 @@ export default
     computed: {
       formattedDate() {return Functions.formattedDate(this.status.datetime)},
       formattedTime() {return Functions.formattedTime(this.status.datetime)},
+      line1(){
+        const setting=this.status.setting;
+        return `TBSK Audio ${setting.frequency.freq}Hz ${setting.tone.ticks}Tick ${setting.baud}bps`;
+      }
     }
   }
 </script>

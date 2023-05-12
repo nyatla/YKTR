@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import {Functions,dbg} from '../../assets/classes';
+import {Functions} from '../../assets/classes';
 
 import TextView from '../view/TextView.vue';
 import HexView from '../view/HexView.vue';
@@ -42,7 +42,7 @@ export default
     props: {
       status:{
         type:Object,
-        default:dbg.rxDummyData(),
+        default:undefined,
       },
       info:{
         line1:String,

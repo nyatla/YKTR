@@ -1,7 +1,10 @@
 <template>
   <div class="screen">
-    <h1>TBSK Transceiver</h1>
+    <img class="logo" :src="application.res.imgs.logo"/>
+    <div class="title">TBSK Transceiver</div>
+    <div class="subtitle">Light weight general purpose audio transceiver</div>
     <hr/>
+    <div class="footer">{{application.version.toString()}} - Copyright © 2023 <a href="https://nyatla.jp/">nyatla.jp</a></div>
     <div class="main">
       <div class="title">Set Application Type</div>
       <hr />
@@ -105,7 +108,7 @@ export default {
     application:{
       type:Object,
       required:true,
-    }
+    },
   },
   data() {
     return {
@@ -117,45 +120,38 @@ export default {
     }
   },
   beforeMount(){
+
+    const current_setting=this.application.current_setting;
+    //freq_select
+    const fl=FREQUENCY_LIST;
+    for(let i=0;i<fl.length;i++){
+      if(fl[i].name==current_setting.frequency.name){
+        this.freqs_select=i;
+        break;
+      }
+    }
+    //tone list
     this.tones=[
         new SinToneSpec(10,10),
         new XpskSinToneSpec(10,10),
-    ];
-    const current_setting=this.application.current_setting;
-    if(current_setting){
-      //freq_select
-      const fl=FREQUENCY_LIST;
-      for(let i=0;i<fl.length;i++){
-        if(fl[i].name==current_setting.frequency.name){
-          this.freqs_select=i;
-          break;
-        }
-      }
-      //tone list
-      let current_tone=current_setting.tone;
-      switch(current_tone.name){
-      case "SIN":
-        this.tones[0]=current_tone;
+    ];    
+    let current_tone=current_setting.tone;
+    switch(current_tone.name){
+    case "SIN":
+      this.tones[0].copyFrom(current_tone);
+      break;
+    case "XPSK":
+      this.tones[1].copyFrom(current_tone);
+      break;
+    default:
+      throw new Error();
+    }
+    const tl=this.tones;
+    for(let i=0;i<tl.length;i++){
+      if(tl[i].name==current_setting.tone.name){
+        this.tones_select=i;
         break;
-      case "XPSK":
-        this.tones[1]=current_tone;
-          break;
-      default:
-        throw new Error();
       }
-      const tl=this.tones;
-      for(let i=0;i<tl.length;i++){
-        if(tl[i].name==current_setting.tone.name){
-          this.tones_select=i;
-          break;
-        }
-      }
-    }else{
-      //tone list
-      this.tones=[
-        new SinToneSpec(10,10),
-        new XpskSinToneSpec(10,10),
-      ];
     }
     console.log("init",this.tones);
   },
@@ -219,7 +215,7 @@ export default {
       let freq= this.freqs[this.freqs_select];
       let tone= this.tones[this.tones_select];
       let ticks=tone.points*tone.cycle;
-      return `TBSK ${freq.freq}Hz ${ticks}Ticks ${tone.name} Tone`;
+      return `TBSK ${freq.freq}Hz ${ticks}Ticks ${tone.name} Tone - ${(freq.freq/ticks).toFixed(1)} bps`;
     },
   }
 }
@@ -228,14 +224,30 @@ export default {
 <style lang="less" scoped>
 @import "../assets/global.less";
 
+.logo{
+  margin:1rem;
+  width:5rem;
+}
+.title{
+  font-size:1.6rem;
+}
+.subtitle{
+  font-size:0.8rem;
+}
 .screen{
+}
+.footer{
+  .inherit_app_setting;
+  position: fixed;
+  height:2rem;
+  bottom: 0;
 }
 .main {
   .inherit_app_setting;
   background-color: @LOGIN_BG;
   padding: .25rem;
-  position: absolute;
-  top:25vh;
+//  position: absolute;
+//  top:30vh;
   min-height:16.5rem;
   >hr {
     height: 1px;
@@ -248,6 +260,9 @@ export default {
     margin: 0;
     font-size: 1.5rem;
   }
+
+
+  
 
   .settings {
     margin: 0;

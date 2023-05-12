@@ -8,7 +8,7 @@
         <div>{{ formattedTime }}</div>
       </div>
       <div class="info">
-        <div>{{ info.line1 }}</div>
+        <div>{{ line1 }}</div>
         <div>{{ status.rawdata.length }} bytes received.</div>
       </div>
     </div>
@@ -28,13 +28,13 @@
       </ul>
     </div>
     <div class="footer">
-      <button @click="()=>{$emit('event-close')}">close</button>
+      <button @click="()=>{$emit('event-close')}">Close</button>
     </div>
   </div>
 </template>
 
 <script>
-import {dbg,Functions} from '../../assets/classes';
+import {Functions} from '../../assets/classes';
 
 import TextView from '../view/TextView.vue';
 import HexView from '../view/HexView.vue';
@@ -51,15 +51,8 @@ export default
     props: {
       status:{
         type:Object,
-        default:dbg.rxDummyData(),
+        default:undefined,
       },      
-      info:{
-        type:Object,
-        default:{
-          line1:'LINE1',
-          line2:'LINE2'
-        },
-      }
     },
     data() {
       return {
@@ -75,8 +68,12 @@ export default
     },
     computed: {
       formattedDate() {return Functions.formattedDate(this.status.datetime)},
-      formattedTime() {return Functions.formattedTime(this.status.datetime)}
-    }
+      formattedTime() {return Functions.formattedTime(this.status.datetime)},
+      line1(){
+        const setting=this.status.setting;
+        return `TBSK Audio ${setting.frequency.freq}Hz ${setting.tone.ticks}Tick ${setting.baud}bps`;
+      }
+      }
   }
 </script>
 
