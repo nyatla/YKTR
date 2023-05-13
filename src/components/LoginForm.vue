@@ -1,7 +1,7 @@
 <template>
   <div class="screen">
     <img class="logo" :src="application.res.imgs.logo"/>
-    <div class="title">TBSK Transceiver</div>
+    <div class="title">TBSK Transceiver (alpha)</div>
     <div class="subtitle">Light weight general purpose audio transceiver</div>
     <hr/>
     <div class="footer">{{application.version.toString()}} - Copyright © 2023 <a href="https://nyatla.jp/">nyatla.jp</a></div>

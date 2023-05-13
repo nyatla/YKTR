@@ -10,11 +10,24 @@
       <TimeLine :application="application" :tbsk="tbsk" @event-close="handleTimelineClose" />
     </div>
   </div>
+  <ModalFrame v-if="state=='warn_ios'">
+    <WarningIos :application="application" @event-close="OnCloseWarning"></WarningIos>
+  </ModalFrame>
+
 </template>
 <script>
 
 
+function getiOSVersion(){
+    return parseFloat(
+        ('' + (/CPU.*OS ([0-9_]{1,5})|(CPU like).*AppleWebKit.*Mobile/i.exec(navigator.userAgent) || [0,''])[1])
+        .replace('undefined', '3_2').replace('_', '.').replace('_', '')
+    ) || false;
+}
+
 import img_logo from '@/assets/icon256.png'
+import WarningIos from './components/window/WarningIos.vue'
+import ModalFrame from './components/ctrl/ModalFrame.vue'
 
 import LoginForm from './components/LoginForm.vue'
 import TimeLine from './components/TimeLine.vue'
@@ -28,6 +41,8 @@ export default {
     LoginForm,
     TimeLine,
     App_Debug,
+    WarningIos,
+    ModalFrame,
 
   },
   props:{
@@ -49,6 +64,10 @@ export default {
     }
   },  
   methods: {
+    OnCloseWarning(event){
+      this.application.env.dont_show_again_ios_warn=event.dont_show_again;
+      this.state="rawpacket";
+    },
     async OnGo(event){
       assert(this.state=="login");
       this.application.current_setting=event.setting;
@@ -58,8 +77,12 @@ export default {
         console.log(tbsk.version);
         this.tbsk=tbsk;
       }
-      this.state="rawpacket";
-//      console.log(this.state);
+      let warn=this.application.env.dont_show_again_ios_warn;
+      if(getiOSVersion()!==false && (warn===undefined||warn===false)){
+        this.state="warn_ios";
+      }else{
+        this.state="rawpacket";
+      }
     },
     handleTimelineClose(event){
       this.state="login";

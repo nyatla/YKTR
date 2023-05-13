@@ -19,6 +19,7 @@ export default {
     },
     data() {
         return {
+            _slot_key:0,    //スロットの更新キー.updateでインクリメント
             offset: 0,
             /**
              * 0:左詰めで右端まで表示。溢れたら左スクロール。
@@ -56,6 +57,7 @@ export default {
          * スロットを更新したときに呼び出す。
          */
         update(){
+            this._slot_key++;
             this._startAnimation();
         },
         _handleResize() {

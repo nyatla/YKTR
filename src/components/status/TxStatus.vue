@@ -13,7 +13,7 @@
           <template v-slot:contents>
             <div v-if="mode==0" class="statictext">{{ static_message }}</div>
             <div v-if="mode==1" class="txtext">
-              <span v-for="(c, i) in static_message" v-bind:key="i" :class="{ 'hexascii': (typeof c) != 'string' }">{{ ((typeof c) == 'string') ? c : toHex(c, 2) }}</span>            
+              <span v-for="(c, i) in tx_text" :key="i" :class="{ 'hexascii': (typeof c) != 'string' }">{{ ((typeof c) == 'string') ? c : toHex(c, 2) }}</span>            
             </div>
           </template>          
         </AdaptiveScrollDiv>
@@ -52,6 +52,7 @@ export default
         date: new Date(),
         mode:0,//表示モード
         static_message:"",
+        tx_text:[],
       }
     },
     mounted(){
@@ -85,12 +86,18 @@ export default
       },
       "status.cache.message":{
         handler(new_,old_){
-          this.static_message=new_;
+          if(typeof(new_)=="string"){
+            this.static_message=new_;
+          }else{
+            console.log("update",new_);
+            this.tx_text=new_;
+          }
           this.$refs.scrolldiv.update();
         },
       },
     },    
     methods: {
+      toHex:Functions.toHex,
       handleClick(){
         //クリックされた通知
         this.$emit("event-click",{sid:this.status.sid});

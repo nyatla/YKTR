@@ -16,6 +16,8 @@
 </template>
 
 <script>
+import { Functions } from '../../assets/classes';
+
 
 export default
   {
@@ -29,13 +31,7 @@ export default
       }
     },
     methods: {
-      toHex(value, d) {
-        let r = value.toString(16);
-        while (r.length < d) {
-          r = '0' + r;
-        }
-        return r;
-      },
+      toHex:Functions.toHex,
     },
     computed: {
       binViewArray() {

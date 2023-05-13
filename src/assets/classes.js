@@ -10,6 +10,7 @@ const VERSION={
 
 const Functions={
   toHex:(value, d)=>{
+    console.log("WHY");
     let r = value.toString(16);
     while (r.length < d) {
         r = '0' + r;
@@ -21,7 +22,30 @@ const Functions={
   },
   formattedTime:(d)=>{
     return d.toLocaleTimeString(navigator.language, { hour12: false ,hour: 'numeric', minute: '2-digit'});
-  }
+  },
+  formatFreq:function(s){
+    let w=s.toFixed();
+    let d=0;
+    for(let i=w.length-1;i>=0;i--){
+      if(w[i]==0){
+        d++;
+      }else{
+        break;
+      }
+    }
+    let ret=w+" Hz";
+    let tmp=undefined;
+    if(d>=3){
+      //3桁以上ならkHz表示
+      tmp=w.slice(0,w.length-3)+" kHz";
+    }else{
+      tmp=w.slice(0,-3)+"."+w.slice(-3,d==0?undefined:-d)+" kHz";
+    }
+    if(tmp!==undefined && tmp.length<=ret.length){
+      ret=tmp;
+    }
+    return ret;
+  },
 }
 
 function clone(v){
@@ -36,6 +60,7 @@ function assert(exp){
 }
 
 function toHex(value, d) {
+  console.log("WHY");
     let r = value.toString(16);
     while (r.length < d) {
         r = '0' + r;
@@ -221,6 +246,9 @@ class Application{
       new XpskSinToneSpec(10,10)
     );
     this.statuses=new StatusDataList();//ステータス
+    this.env={
+      dont_show_again_ios_warn:undefined  //
+    };
   }
 }
 
@@ -281,8 +309,6 @@ export {
     Application,
     assert,
     clone,
-    toHex,
-//    dbg,
     Functions,
     BrokenCodeText,
     DEFAULT_SETTING,

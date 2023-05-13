@@ -167,7 +167,7 @@ export default {
   created() {
 
   },
-  beforeUnmount() {
+  async beforeUnmount() {
     clearInterval(this._timer);
     this._socket.close();
     //closeに時間かかるかも。
@@ -239,12 +239,16 @@ export default {
     sendcompleted(event){
       let status = this._statusOfSid(this.active_tx_sid);
       status.cache.message="Completed";
+      console.log("OK");
       //
       let bct=new BrokenCodeText();
+      console.log("OKOK");
       bct.update(status.rawdata);
+      console.log("OKOKOK");
 
       let message=[...bct.fixed];
       message.push(...bct.unfixed);
+      console.log("sendcomplete",message);
       setTimeout(()=>{
         status.cache.message=message;
         status.fixed=true;

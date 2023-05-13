@@ -11,7 +11,7 @@
         <div>{{ line1 }}</div>
         <div>
           <span v-if="!status.fixed">Transmitting...</span>
-          <span v-if="status.fixed">{{ status.rawdata.length }} bytes transmitted.</span>          
+          <span v-if="status.fixed">{{ status.rawdata.length }}<span class="small"> bytes transmitted.</span></span>          
         </div>
       </div>
     </div>
@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import {Functions} from '../../assets/classes';
+import {Functions, assert} from '../../assets/classes';
 
 import TextView from '../view/TextView.vue';
 import HexView from '../view/HexView.vue';
@@ -54,7 +54,7 @@ export default
     props: {
       status:{
         type:Object,
-        default:undefined,
+        require:true
       },
     },
     data() {
@@ -67,17 +67,19 @@ export default
     methods: {
       changeTab: function(num){
         this.active_tab = num
-      }     
+      },
     },
+
     computed: {
       formattedDate() {return Functions.formattedDate(this.status.datetime)},
       formattedTime() {return Functions.formattedTime(this.status.datetime)},
       line1(){
         const setting=this.status.setting;
-        return `TBSK Audio ${setting.frequency.freq}Hz ${setting.tone.ticks}Tick ${setting.baud}bps`;
+        return `TBSK Audio ${Functions.formatFreq(setting.frequency.freq)} ${setting.tone.ticks}Tick ${setting.baud}bps`;
       }
     }
   }
+  
 </script>
 
 <style lang="less" scoped>

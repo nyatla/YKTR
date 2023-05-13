@@ -9,7 +9,7 @@
           <div>{{activity_time_text}}</div>
         </div>
         <div class="info">
-          <div class="line1">CARRIER {{ setting.frequency.freq }} Hz - {{ticks}} Ticks TBSK Modulation</div>
+          <div class="line1">CARRIER {{frequency}} - {{ticks}} Ticks TBSK Modulation</div>
           <div class="volume">
             <div :style="metor"><!--metor --></div>
           </div>
@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import {DEFAULT_SETTING} from "../assets/classes"
+import {DEFAULT_SETTING, Functions} from "../assets/classes"
 
 
 
@@ -60,7 +60,11 @@ export default
   computed: {
     ticks(){
       return this.setting.tone.ticks;
+    },
+    frequency(){
+      return Functions.formatFreq(this.setting.frequency.freq);
     }
+  
   }
 }
 </script>

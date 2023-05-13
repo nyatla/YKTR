@@ -11,8 +11,8 @@
         <div><span v-if="status.fixed"></span>{{ status.rawdata.length }} byte</div>        
         <AdaptiveScrollDiv ref="scrolldiv">
           <template v-slot:contents>
-            <span v-for="(c, i) in fixedtext" v-bind:key="i" :class="{ 'hexascii': (typeof c) != 'string' }">{{ ((typeof c) == 'string') ? c : toHex(c, 2) }}</span>
-            <span class="unfixed" v-for="(c, i) in unfixed" v-bind:key="i">{{ toHex(c, 2) }}</span>        
+            <span v-for="(c, i) in fixedtext" :key="i" :class="{ 'hexascii': (typeof c) != 'string' }">{{ ((typeof c) == 'string') ? c : toHex(c, 2) }}</span>
+            <span class="unfixed" v-for="(c, i) in unfixed" :key="i">{{ toHex(c, 2) }}</span>        
           </template>
         </AdaptiveScrollDiv>
       </div>
