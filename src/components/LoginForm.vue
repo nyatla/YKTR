@@ -5,7 +5,7 @@
     <div class="subtitle">Light weight general purpose audio transceiver</div>
     <hr/>
     <div class="footer">{{application.version.toString()}} - Copyright © 2023 <a href="https://nyatla.jp/">nyatla.jp</a></div>
-    <div class="main">
+    <div class="window">
       <div class="title">Set Application Type</div>
       <hr />
       <ul class="settings">
@@ -223,7 +223,9 @@ export default {
   
 <style lang="less" scoped>
 @import "../assets/global.less";
-
+.screen{
+  .inherit_app_setting;
+}
 .logo{
   margin:1rem;
   width:5rem;
@@ -234,16 +236,17 @@ export default {
 .subtitle{
   font-size:0.8rem;
 }
-.screen{
-}
+
 .footer{
   .inherit_app_setting;
   position: fixed;
   height:2rem;
   bottom: 0;
+  z-index: 100;
 }
-.main {
-  .inherit_app_setting;
+.window {
+  position: relative;
+  z-index: 1000;
   background-color: @LOGIN_BG;
   padding: .25rem;
 //  position: absolute;
