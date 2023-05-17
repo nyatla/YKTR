@@ -4,10 +4,20 @@
       <StatusDashboard ref="dashboardRef" :setting="setting" :activity_time_text="activity_time_text"></StatusDashboard>
     </div>
     <ul class="status-ul">
-        <li v-for="(status, index) in statuses" :key="status.sid">
-          <RxStatus v-if="status.type == 'rx'" :status="status" @event-click="OnRxClick"></RxStatus>
-          <TxStatus v-if="status.type == 'tx'" :status="status" @event-click="OnTxClick"></TxStatus>
+      <template v-for="(status, index) in statuses" :key="status.sid">        
+        <li>
+          <KeepAlive>
+            <component
+              :is="status.type === 'tx'?'TxStatus':'RxStatus'"
+              :ref="(el)=>{status.ref=el}" :status="status" @event-click="OnStatusClick">
+            </component>
+          </KeepAlive>
         </li>
+      </template>
+        <!-- <li v-for="(status, index) in statuses" :key="status.sid">
+          <RxStatus v-if="status.type == 'rx'" :status="status" @event-click="OnRxClick"></RxStatus>
+          <TxStatus v-else-if="status.type == 'tx'" :status="status" @event-click="OnTxClick"></TxStatus>
+        </li> -->
     </ul>
     <div class="footer_shadow"></div>
     <div class="footer_panel">
@@ -196,8 +206,6 @@ export default {
     _addNewTx(data){
       let ts=this.application.statuses.newTx(this.application.current_setting);
       ts.rawdata=data;
-      ts.cache.mode=0;
-      ts.cache.message="Modulating";
       this.statuses.unshift(ts);//表示にも書込み
       return ts;
     },
@@ -206,16 +214,20 @@ export default {
       this.statuses.unshift(ts);//表示にも書込み
       return ts;
     },
-
-    OnRxClick(event){
-      this.selected_sid=event.sid;
-      this.modal="rx";
+    OnStatusClick(event){
       console.log("selected",event);
-    },
-    OnTxClick(event){
-      this.selected_sid=event.sid;
-      this.modal="tx";
-      console.log("selected",event);
+      switch(event.type){
+        case "rx":
+          this.selected_sid=event.sid;
+          this.modal="rx";
+          break;
+        case "tx":
+          this.selected_sid=event.sid;
+          this.modal="tx";
+          break;
+        default:
+          throw new Error();
+      }
     },
     OnNewTxClick(event){
       this.modal="newtx";
@@ -226,33 +238,32 @@ export default {
     OnTransmit(event){
       let ts=this._addNewTx(event.data);
       this.active_tx_sid=ts.sid;
-      this._socket.send(ts.rawdata);
       this.modal="";
+      //レンダリングを待つのだ。
+      this.$nextTick(()=>{
+        ts.ref.setMessage("Modulating");
+        this._socket.send(ts.rawdata);
+      });
     },
     async OnModalClose(event){
       this.modal="";
     },
     sendstart(event){
       let status = this._statusOfSid(this.active_tx_sid);
-      status.cache.message="Transmiting";
+      status.ref.setMessage("Transmiting");
     },
     sendcompleted(event){
       let status = this._statusOfSid(this.active_tx_sid);
-      status.cache.message="Completed";
-      console.log("OK");
+      status.ref.setMessage("Completed");
       //
       let bct=new BrokenCodeText();
-      console.log("OKOK");
       bct.update(status.rawdata);
-      console.log("OKOKOK");
-
       let message=[...bct.fixed];
       message.push(...bct.unfixed);
       console.log("sendcomplete",message);
       setTimeout(()=>{
-        status.cache.message=message;
+        status.ref.setTxData(message);
         status.fixed=true;
-        status.cache.mode=1;
       },500);
     },
     async close() {
@@ -277,12 +288,20 @@ export default {
         n.push(i);
       }
       status.cache._dec.update(n);
+      if(status.ref){
+        status.ref.update();
+      }
     },
     // eslint-disable-next-line no-unused-vars
     lost(event) {
       let status = this._statusOfSid(this.active_rx_sid);
       status.fixed=true;
       this.active_rx_sid=undefined;
+      if(status.ref){
+        status.ref.update();
+      }else{
+        this.$nextTick(()=>{status.ref.update();});
+      }
     },
   }
 }

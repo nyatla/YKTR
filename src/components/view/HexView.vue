@@ -45,9 +45,9 @@ export default
         }
         return r;
       },
-      formattedDate() {
-        return this.date.toLocaleString(navigator.language, { hour12: false });
-      }
+      // formattedDate() {
+      //   return this.date.toLocaleString(navigator.language, { hour12: false });
+      // }
     }
   }
 </script>

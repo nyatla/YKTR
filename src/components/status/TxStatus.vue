@@ -10,12 +10,13 @@
       <div class="info">
         <div>{{ status.rawdata.length }} byte</div>
         <AdaptiveScrollDiv ref="scrolldiv">
-          <template v-slot:contents>
             <div v-if="mode==0" class="statictext">{{ static_message }}</div>
             <div v-if="mode==1" class="txtext">
-              <span v-for="(c, i) in tx_text" :key="i" :class="{ 'hexascii': (typeof c) != 'string' }">{{ ((typeof c) == 'string') ? c : toHex(c, 2) }}</span>            
+              <template v-for="(c, i) in txdata" >
+                <span v-if="c[0]==0" :key="'s'+i">{{c[1]}} </span>
+                <span v-else="c[0]==1" class="hexascii" :key="'h'+i">{{c[1]}}</span>
+              </template>
             </div>
-          </template>          
         </AdaptiveScrollDiv>
       </div>
     </div>
@@ -32,7 +33,18 @@ import HexView from '../view/HexView.vue';
 import AdaptiveScrollDiv from '../ctrl/AdaptiveScrollDiv.vue';
 
 
-
+function conv2TxData(txdata)
+{
+  let w=[];
+  for(let i of txdata){
+    if((typeof i)=="string"){
+      w.push([0,i]);
+    }else{
+      w.push([1,Functions.toHex(i,2)]);
+    }
+  }
+  return w;
+}
 
 export default
   {
@@ -49,58 +61,45 @@ export default
     },
     data() {
       return {
-        date: new Date(),
+        date: this.status.datetime,
         mode:0,//表示モード
         static_message:"",
-        tx_text:[],
+        txdata:[],//[[class,string],..]
       }
     },
     mounted(){
       if(this.status.fixed){
         this.$refs.scrolldiv.setMode(0,true);
-        this.static_message=this.status.cache.message;
+        this.txdata=this.status.cache.tx_txdata;
         this.mode=1;
       }else{
-        this.$refs.scrolldiv.setMode(11,true);
       }
     },
     watch:{
-      // "status.fixed":{
-      //   handler(new_,old_){
-      //     if(new_===true && old_===false){
-      //       this.$refs.scrolldiv.setMode(1);
-      //     }
-      //   }
-      // },
-      "status.cache.mode":{
-        handler(new_,old_){
-          // if(this.status.fixed){
-          //   return;
-          // }
-          this.mode=new_;
-          if(this.mode==1){
-            console.log("mode change");
-            this.$refs.scrolldiv.setMode(1,true);
-          }
-        },
-      },
-      "status.cache.message":{
-        handler(new_,old_){
-          if(typeof(new_)=="string"){
-            this.static_message=new_;
-          }else{
-            console.log("update",new_);
-            this.tx_text=new_;
-          }
-          this.$refs.scrolldiv.update();
-        },
-      },
     },    
-    methods: {
-      toHex:Functions.toHex,
+    methods:
+    {
+      setMessage(message){
+        this.static_message=message;
+        this.txdata=[];
+        this.mode=0;
+        this.$refs.scrolldiv.setMode(11,true);
+      },
+      /**
+       * 差分じゃなくて一括
+       * @param {*} txdata 
+       */
+      setTxData(txdata)
+      {
+        this.mode=1;
+        this.txdata=conv2TxData(txdata);
+        this.status.cache.tx_txdata=this.txdata;
+        this.static_message="";
+        this.$refs.scrolldiv.setMode(1,true);
+      },
       handleClick(){
         //クリックされた通知
-        this.$emit("event-click",{sid:this.status.sid});
+        this.$emit("event-click",{type:"tx",sid:this.status.sid});
       }
     },
     computed: {

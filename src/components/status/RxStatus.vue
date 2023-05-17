@@ -10,9 +10,12 @@
       <div class="info">
         <div><span v-if="status.fixed"></span>{{ status.rawdata.length }} byte</div>        
         <AdaptiveScrollDiv ref="scrolldiv">
-          <template v-slot:contents>
-            <span v-for="(c, i) in fixedtext" :key="i" :class="{ 'hexascii': (typeof c) != 'string' }">{{ ((typeof c) == 'string') ? c : toHex(c, 2) }}</span>
-            <span class="unfixed" v-for="(c, i) in unfixed" :key="i">{{ toHex(c, 2) }}</span>        
+          <template v-for="(c, i) in fixedtext" >
+            <span v-if="c[0]==0" :key="'s'+i">{{c[1]}} </span>
+            <span v-else="c[0]==1" :key="'h'+i" class="hexascii">{{c[1]}}</span>
+          </template>
+          <template v-for="(c, i) in unfixed">
+            <span class="hexascii">{{c[1]}}</span>
           </template>
         </AdaptiveScrollDiv>
       </div>
@@ -29,7 +32,23 @@ import TextView from '../view/TextView.vue';
 import HexView from '../view/HexView.vue';
 import AdaptiveScrollDiv from '../ctrl/AdaptiveScrollDiv.vue';
 
-
+/**
+ * 
+ * @param {*} rxdata [string|number]
+ * @retrun [[number,string]]
+ */
+function conv2RxData(rxdata)
+{
+  let w=[];
+  for(let i of rxdata){
+    if((typeof i)=="string"){
+      w.push([0,i]);
+    }else{
+      w.push([1,Functions.toHex(i,2)]);
+    }
+  }
+  return w;
+}
 
 
 export default
@@ -50,25 +69,6 @@ export default
       }
     },
     watch:{
-      "status.fixed":{
-        handler(new_,old_){
-          if(new_===true && old_===false){
-//            console.log("FIXED",this.status.cache._dec.fixed);
-            this.$refs.scrolldiv.setMode(1);
-          }
-        },
-        immediate:true,
-      },
-      "status.rawdata":{
-        handler(new_,old_) {
-          let dec=this.status.cache._dec;
-          this.fixedtext=dec.fixed;
-          this.unfixed=dec.unfixed;
-          this.$refs.scrolldiv.update();
-        },
-//        immediate:true,
-        deep:true//暫定実装。パフォーマンスに影響があるのででっかい配列の場合は処理を切り替えて
-      }
     },
     data() {
       return {
@@ -78,17 +78,26 @@ export default
     },
     mounted(){
       let dec=this.status.cache._dec;
-      this.fixedtext=dec.fixed;
-      this.unfixed=dec.unfixed;
+      this.fixedtext=conv2RxData(dec.fixed);
+      this.unfixed=conv2RxData(dec.unfixed);
       if(this.status.fixed){
         this.$refs.scrolldiv.setMode(10,true);
       }
     },
     methods: {
-      toHex:Functions.toHex,
+      update(){
+        let dec=this.status.cache._dec;
+        this.fixedtext=conv2RxData(dec.fixed);
+        this.unfixed=conv2RxData(dec.unfixed);
+        if(this.status.fixed){
+          this.$refs.scrolldiv.setMode(1);
+        }else{
+          this.$refs.scrolldiv.update();
+        }
+      },
       handleClick(){
         //クリックされた通知
-        this.$emit("event-click",{sid:this.status.sid});
+        this.$emit("event-click",{type:"rx",sid:this.status.sid});
       }
     },
     computed: {

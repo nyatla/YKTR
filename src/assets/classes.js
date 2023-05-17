@@ -174,14 +174,15 @@ class StatusData{
     this.type=type;
     this.datetime=new Date();
     this.cache={};//データキャッシュ
+    this.ref=null;
   }
 }
 class RxStatusData extends StatusData{
   constructor(sid,setting){
     super(sid,"rx");
     this.setting=setting;
-    this.rawdata=[];
-    this.fixed=false;//受信済フラグ
+    this.rawdata=[];  //追記のみの受信データ
+    this.fixed=false; //受信済フラグ
     this.cache._dec=new BrokenCodeText();
   }
 }
@@ -190,10 +191,9 @@ class TxStatusData extends StatusData{
   constructor(sid,setting){
     super(sid,"tx");
     this.setting=setting;
-    this.rawdata=[];
+    this.rawdata=[];  //追記のみの送信データ
     this.fixed=false;//送信済みフラグ
-    this.cache.mode=0;    //表示モード(0=メッセージ,1=データ)
-    this.cache.message="";//表示モード0の時のメッセージ
+    this.cache.tx_txdata=0;
   }
 }
 

@@ -4,7 +4,9 @@
     <div class="marquee" ref="marquee">
         <!-- <div class="text" :style="{ width: textWidth + 'px', transform: 'translateX(' + offset + 'px)' }">{{ text }}</div> -->
         <div class="text" ref="text" :style="{transform: 'translateX(' + offset + 'px)' }">
-            <slot name="contents"></slot>
+            <template v-if="true">
+                <slot name="default"></slot>
+            </template>
         </div>
     </div>
 </template>
@@ -19,7 +21,7 @@ export default {
     },
     data() {
         return {
-            _slot_key:0,    //スロットの更新キー.updateでインクリメント
+            _slot_age:0,
             offset: 0,
             /**
              * 0:左詰めで右端まで表示。溢れたら左スクロール。
@@ -57,7 +59,8 @@ export default {
          * スロットを更新したときに呼び出す。
          */
         update(){
-            this._slot_key++;
+            this._slot_age++;
+//            console.log(this._slot_age);
             this._startAnimation();
         },
         _handleResize() {
@@ -77,6 +80,7 @@ export default {
         },
         scrollContent()
         {
+            
             this.animationFrame=null;
             let textwidth=this.$refs.text.scrollWidth;
 //            console.log("sc",textwidth);
