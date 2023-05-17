@@ -193,7 +193,24 @@ class TxStatusData extends StatusData{
     this.setting=setting;
     this.rawdata=[];  //追記のみの送信データ
     this.fixed=false;//送信済みフラグ
+    this.cache.bct=new BrokenCodeText();
     this.cache.tx_txdata=0;
+  }
+  push(d){
+    this.rawdata.push(...d);
+    this.cache.bct.update(d);
+  }
+  /**
+   * この値は追記データ.
+   */
+  get fixedData(){
+    return this.cache.bct.fixed;
+  }
+  /**
+   * この値は追記データではない
+   */
+  get unfixedData(){    
+    return this.cache.bct.unfixed;
   }
 }
 

@@ -32,7 +32,6 @@ import TextView from '../view/TextView.vue';
 import HexView from '../view/HexView.vue';
 import AdaptiveScrollDiv from '../ctrl/AdaptiveScrollDiv.vue';
 
-
 function conv2TxData(txdata)
 {
   let w=[];
@@ -69,8 +68,9 @@ export default
     },
     mounted(){
       if(this.status.fixed){
+
         this.$refs.scrolldiv.setMode(0,true);
-        this.txdata=this.status.cache.tx_txdata;
+        this.initTxData();
         this.mode=1;
       }else{
       }
@@ -79,21 +79,25 @@ export default
     },    
     methods:
     {
+      initTxData(){
+        let f=conv2TxData(this.status.fixedData);
+        let u=conv2TxData(this.status.unfixedData);
+        this.txdata.push(...f);
+        this.txdata.push(...u);
+      },
       setMessage(message){
         this.static_message=message;
-        this.txdata=[];
         this.mode=0;
         this.$refs.scrolldiv.setMode(11,true);
       },
       /**
        * 差分じゃなくて一括
-       * @param {*} txdata 
        */
-      setTxData(txdata)
+      setTxData()
       {
         this.mode=1;
-        this.txdata=conv2TxData(txdata);
-        this.status.cache.tx_txdata=this.txdata;
+        //表示データに変換
+        this.initTxData();
         this.static_message="";
         this.$refs.scrolldiv.setMode(1,true);
       },

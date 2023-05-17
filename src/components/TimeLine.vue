@@ -14,10 +14,6 @@
           </KeepAlive>
         </li>
       </template>
-        <!-- <li v-for="(status, index) in statuses" :key="status.sid">
-          <RxStatus v-if="status.type == 'rx'" :status="status" @event-click="OnRxClick"></RxStatus>
-          <TxStatus v-else-if="status.type == 'tx'" :status="status" @event-click="OnTxClick"></TxStatus>
-        </li> -->
     </ul>
     <div class="footer_shadow"></div>
     <div class="footer_panel">
@@ -205,7 +201,8 @@ export default {
     },
     _addNewTx(data){
       let ts=this.application.statuses.newTx(this.application.current_setting);
-      ts.rawdata=data;
+      ts.push(data);
+//      ts.rawdata=data;
       this.statuses.unshift(ts);//表示にも書込み
       return ts;
     },
@@ -256,13 +253,13 @@ export default {
       let status = this._statusOfSid(this.active_tx_sid);
       status.ref.setMessage("Completed");
       //
-      let bct=new BrokenCodeText();
-      bct.update(status.rawdata);
-      let message=[...bct.fixed];
-      message.push(...bct.unfixed);
-      console.log("sendcomplete",message);
+      // let bct=new BrokenCodeText();
+      // bct.update(status.rawdata);
+      // let message=[...bct.fixed];
+      // message.push(...bct.unfixed);
+      // console.log("sendcomplete",message);
       setTimeout(()=>{
-        status.ref.setTxData(message);
+        status.ref.setTxData();
         status.fixed=true;
       },500);
     },
