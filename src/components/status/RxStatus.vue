@@ -93,6 +93,11 @@ export default
       update()
       {
         const fd=this.status.fixedData;
+        //タイミングの問題で反映されんこともある。
+        if(fd.length<1){
+          return;
+        }
+        console.log("fd",fd,fd.length);
         let fixed_pos=this.status.fixedData.length;
         if(fixed_pos-1>this.last_fixed_pos){
           //末端-1までを確定キューに淹れる。
