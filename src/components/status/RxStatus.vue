@@ -76,7 +76,7 @@ export default
     },
     data() {
       return {
-        last_fixed_pos:0,//配列の長さを16bitLシフトして、末端要素の文字数を加算した数
+        last_fixed_pos:0,
         fixedtext:[], //確定値
         fixedtext2:[],//未確定文字列を含む確定値
         unfixed:[],//未確定値
@@ -97,7 +97,6 @@ export default
         if(fd.length<1){
           return;
         }
-        console.log("fd",fd,fd.length);
         let fixed_pos=this.status.fixedData.length;
         if(fixed_pos-1>this.last_fixed_pos){
           //末端-1までを確定キューに淹れる。

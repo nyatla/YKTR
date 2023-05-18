@@ -6,9 +6,9 @@
         <th v-for="(n, i) in 16" v-bind:key="i">{{ '+' + toHex(n - 1, 1) }}</th>
         <th></th>
       </tr>
-      <tr v-for="(r, i) in binViewArray" v-bind:key="i">
+      <tr v-for="(r, i) in display_data" v-bind:key="i">
         <td>{{ toHex(i * 16, 4) }}</td>
-        <td v-for="(c, j) in r" v-bind:key="j">{{ toHex(c, 2) }}</td>
+        <td v-for="(c, j) in r" v-bind:key="i+'-'+j">{{c}}</td>
       </tr>
     </table>
   </div>
@@ -28,10 +28,24 @@ export default
     },
     data() {
       return {
+        display_data:[],
+        parsed_len:0,
       }
     },
     methods: {
       toHex:Functions.toHex,
+      update(){
+        if(this.rawdata.length-this.parsed_len==0){
+          return;
+        }
+        for(let i=this.parsed_len;i<this.rawdata.length;i++){
+          if(i%16==0){
+            this.display_data.push([]);            
+          }
+          this.display_data[this.display_data.length-1].push(this.toHex(this.rawdata[i],2));
+        }
+        this.parsed_len=this.rawdata.length;
+      }
     },
     computed: {
       binViewArray() {

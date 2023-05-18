@@ -1,77 +1,81 @@
 <template>
-    <div class="textview" v-if="rawdata.length > 0">
-      <span v-for="(c, i) in fixed" v-bind:key="i" :class="{ 'hexascii': (typeof c) != 'string' }">{{ ((typeof c) == 'string') ? c : toHex(c, 2) }}</span>
-      <span class="unfixed" v-for="(c, i) in unfixed" v-bind:key="i">{{ toHex(c, 2) }}</span>
+    <div v-if="rawdata.length > 0" class="textview" >
+      <template v-for="(c, i) in fixedtext" >
+        <span v-if="c[0]==0" :key="'s'+i">{{c[1]}} </span>
+        <br v-else-if="c[0]==2" :key="'b'+i"/>
+        <span v-else-if="c[0]==1" :key="'h'+i" class="hexascii">{{c[1]}}</span>
+      </template>
+      <template v-for="(c, i) in fixedtext2" >
+        <span v-if="c[0]==0">{{c[1]}} </span>
+        <br v-else-if="c[0]==2" :key="'b'+i"/>
+        <span v-else-if="c[0]==1" class="hexascii">{{c[1]}}</span>
+      </template>
+      <template v-for="(c, i) in unfixed">
+        <span class="unfixed">{{c[1]}}</span>
+      </template>
     </div>
-    <div class="nodata" v-if="rawdata.length == 0">NO DATA</div>
+    <div v-else class="nodata">NO DATA</div>
 </template>
 
 <script>
-import {BrokenCodeText,Functions} from "../../assets/classes"
+import { registerRuntimeCompiler } from 'vue';
+import {Functions,BrokenCodeText} from '../../assets/classes';
 
+function conv2RxData(rxdata)
+{
+  let w=[];
+  for(let i of rxdata){
+    if((typeof i)=="string"){
+      w.push([0,i]);
+    }else{
+      if(i==0x0a){
+        w.push([2]);
+        //改行の取り扱い
+      }else{
+        w.push([1,Functions.toHex(i,2)]);
+      }
+    }
+  }
+  return w;
+}
 
 export default
   {
     props: {
-      rawdata:Array|Uint8Array
+      rawdata:[]|Uint8Array
     },
     data() {
       return {
-          _dec:undefined,
-          fixed:undefined,
-          unfixed:undefined,
-      }
-    },
-    watch: {
-      rawdata:{
-        handler(new_,old_) {
-          if(old_===undefined || new_.length<=old_.length){
-            this._dec=new BrokenCodeText();
-            this._dec.update(new_);
-          }else{
-            this._dec.update(new_.slice(old_.length));
-          }
-          this.fixed=this._dec.fixed;
-          this.unfixed=this._dec.unfixed;
-        },
-        immediate:true,
-        deep:true//暫定実装。パフォーマンスに影響があるのででっかい配列の場合は処理を切り替えて
+        bct:new BrokenCodeText(),
+        last_fixed_pos:0,
+        parsed_length:0,
+        fixedtext:[],
+        fixedtext2:[],
+        unfixed:[], //[int]
       }
     },
     methods: {
-      toHex:Functions.toHex,
-    },
-    computed: {
-      fixedText() {
-        let d = this.decoder; //デコーダー取得
-        let n = this.rawdata.slice(d.pt);//未解析の配列
-        let contents = this.contents;
-        for (let i of n) {
-          let darray = d.dec.update(i);
-          if (darray == null) {
-            continue;
-          }
-          for (let j = 0; j < darray.length; j++) {
-            if ((typeof darray[j]) == 'string') {
-              let cv = darray[j].charCodeAt();
-              if (cv >= 256 || (cv >= 32 && cv != 127)) {
-                if (contents.length == 0 || (typeof contents[contents.length - 1]) != 'string') {
-                  contents.push("");//新しい文字列ブロック
-                }
-                contents[contents.length - 1] += darray[j];//文字列
-              } else {
-                contents.push(cv);//16進数
-              }
-            } else {
-              contents.push(darray[j]);//16進数
-            }
-          }
+      update()
+      {
+        let s=this.rawdata.slice(this.parsed_length);
+        if(s.length==0){
+          return;
         }
-        d.pt += n.length;
-
-        return contents;
+        this.parsed_length=this.rawdata.length;
+        const fixed=this.bct.fixed;
+        this.bct.update(s);
+        let fixed_pos=fixed.length;
+        if(fixed_pos-1>this.last_fixed_pos){
+          //末端-1までを確定キューに淹れる。
+          this.fixedtext.push(...conv2RxData(fixed.slice(this.last_fixed_pos,fixed_pos-1)));
+          this.last_fixed_pos=fixed_pos-1;
+        }
+        //末端を確定キュー2に設定
+        this.fixedtext2=conv2RxData([fixed[fixed.length-1]]);
+        //未確定を設定
+        this.unfixed=conv2RxData(this.bct.unfixed);
       },
-    }
+    },
   }
 </script>
 

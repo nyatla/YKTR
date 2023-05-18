@@ -10,7 +10,7 @@ const VERSION={
 
 const Functions={
   toHex:(value, d)=>{
-    console.log("WHY");
+    // console.log("WHY");
     let r = value.toString(16);
     while (r.length < d) {
         r = '0' + r;

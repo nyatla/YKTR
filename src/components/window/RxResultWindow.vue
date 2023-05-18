@@ -9,7 +9,7 @@
       </div>
       <div class="info">
         <div>{{ line1 }}</div>
-        <div>{{ status.rawdata.length }}<span class="small"> bytes received.</span></div>
+        <div>{{ bytes_text }}<span class="small"> bytes received.</span></div>
       </div>
     </div>
     <hr />
@@ -19,11 +19,11 @@
         <li v-on:click="changeTab('hex')" v-bind:class="{ 'active': active_tab === 'hex' }">HEX</li>
       </ul>
       <ul class="contents">
-        <li v-if="active_tab === 'text'">
-          <TextView :rawdata="status.rawdata"></TextView>
-        </li>
-        <li v-else-if="active_tab === 'hex'">
-          <HexView :rawdata="status.rawdata"></HexView>
+        <li>
+          <KeepAlive>
+            <TextView v-if="active_tab === 'text'" ref="textview" :rawdata="status.rawdata"></TextView>
+            <HexView v-else-if="active_tab === 'hex'" ref="hexview" :rawdata="status.rawdata"></HexView>
+          </KeepAlive>
         </li>
       </ul>
     </div>
@@ -56,11 +56,34 @@ export default
     },
     data() {
       return {
+        _timer:undefined,
+        bytes_text:0,
         active_tab:"text",
-        date: new Date(),
-        closed: false
       }
     },
+    mounted(){
+      const _t=this;
+      function update(){
+        _t.bytes_text=_t.status.rawdata.length;
+        if(_t.$refs.textview){
+          _t.$refs.textview.update();
+        }
+        if(_t.$refs.hexview){
+          _t.$refs.hexview.update();
+        }
+      }
+      this.$nextTick(()=>{
+        update();
+        this._timer=setInterval(()=>{
+          update();
+        },100);
+      });
+    },
+    beforeUnmount() {
+      clearInterval(this._timer);
+    },
+
+
     methods: {
       changeTab: function(num){
         this.active_tab = num
