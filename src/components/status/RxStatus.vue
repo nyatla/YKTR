@@ -14,6 +14,10 @@
             <span v-if="c[0]==0" :key="'s'+i">{{c[1]}} </span>
             <span v-else="c[0]==1" :key="'h'+i" class="hexascii">{{c[1]}}</span>
           </template>
+          <template v-for="(c, i) in fixedtext2" >
+            <span v-if="c[0]==0">{{c[1]}} </span>
+            <span v-else="c[0]==1" class="hexascii">{{c[1]}}</span>
+          </template>
           <template v-for="(c, i) in unfixed">
             <span class="hexascii">{{c[1]}}</span>
           </template>
@@ -72,23 +76,34 @@ export default
     },
     data() {
       return {
-        fixedtext:[],
-        unfixed:[],
+        last_fixed_pos:0,//配列の長さを16bitLシフトして、末端要素の文字数を加算した数
+        fixedtext:[], //確定値
+        fixedtext2:[],//未確定文字列を含む確定値
+        unfixed:[],//未確定値
       }
     },
     mounted(){
-      let dec=this.status.cache._dec;
-      this.fixedtext=conv2RxData(dec.fixed);
-      this.unfixed=conv2RxData(dec.unfixed);
       if(this.status.fixed){
+        this.fixedtext.push(...conv2RxData(this.status.fixedData));
+        this.unfixed=conv2RxData(this.status.unfixedData);
         this.$refs.scrolldiv.setMode(10,true);
       }
     },
     methods: {
-      update(){
-        let dec=this.status.cache._dec;
-        this.fixedtext=conv2RxData(dec.fixed);
-        this.unfixed=conv2RxData(dec.unfixed);
+      update()
+      {
+        const fd=this.status.fixedData;
+        let fixed_pos=this.status.fixedData.length;
+        if(fixed_pos-1>this.last_fixed_pos){
+          //末端-1までを確定キューに淹れる。
+          this.fixedtext.push(...conv2RxData(fd.slice(this.last_fixed_pos,fixed_pos-1)));
+          this.last_fixed_pos=fixed_pos-1;
+        }
+
+        //末端を確定キュー2に設定
+        this.fixedtext2=conv2RxData([fd[fd.length-1]]);
+        //未確定を設定
+        this.unfixed=conv2RxData(this.status.unfixedData);
         if(this.status.fixed){
           this.$refs.scrolldiv.setMode(1);
         }else{

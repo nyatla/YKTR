@@ -86,6 +86,7 @@ export default {
     },
     handleTimelineClose(event){
       this.state="login";
+      window.scrollTo({ top: 0 });
     }
   }  
 }

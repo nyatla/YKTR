@@ -21,7 +21,7 @@ export default {
     },
     data() {
         return {
-            _slot_age:0,
+            _resize_tid:undefined,
             offset: 0,
             /**
              * 0:左詰めで右端まで表示。溢れたら左スクロール。
@@ -44,6 +44,10 @@ export default {
     },
     beforeUnmount() {
         window.removeEventListener('resize', this._handleResize)
+        if(this._resize_tid){
+            clearTimeout(this._resize_tid);
+            this._resize_tid=undefined;
+        }
         this._stopAnimation()
     },
     methods:
@@ -59,13 +63,17 @@ export default {
          * スロットを更新したときに呼び出す。
          */
         update(){
-            this._slot_age++;
-//            console.log(this._slot_age);
             this._startAnimation();
         },
         _handleResize() {
-            console.log("resize");
-            this._startAnimation();
+            if(this._resize_tid){
+                clearTimeout(this._resize_tid);
+                this._resize_tid=undefined;
+            }
+            //遅延実行
+            this._resize_tid=setTimeout(()=>{
+                this._startAnimation();
+            },300);
         },
         _startAnimation() {
             //二重起動防止

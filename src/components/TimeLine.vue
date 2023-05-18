@@ -202,7 +202,6 @@ export default {
     _addNewTx(data){
       let ts=this.application.statuses.newTx(this.application.current_setting);
       ts.push(data);
-//      ts.rawdata=data;
       this.statuses.unshift(ts);//表示にも書込み
       return ts;
     },
@@ -252,12 +251,6 @@ export default {
     sendcompleted(event){
       let status = this._statusOfSid(this.active_tx_sid);
       status.ref.setMessage("Completed");
-      //
-      // let bct=new BrokenCodeText();
-      // bct.update(status.rawdata);
-      // let message=[...bct.fixed];
-      // message.push(...bct.unfixed);
-      // console.log("sendcomplete",message);
       setTimeout(()=>{
         status.ref.setTxData();
         status.fixed=true;
@@ -279,12 +272,12 @@ export default {
     // eslint-disable-next-line no-unused-vars
     message(event) {
       let status = this._statusOfSid(this.active_rx_sid);
-      let n=[];
-      for(let i of event.data){
-        status.rawdata.push(i);
-        n.push(i);
-      }
-      status.cache._dec.update(n);
+//      let n=[];
+      status.push(event.data);
+//       for(let i of event.data){
+// //        n.push(i);
+//       }
+//      status.cache._dec.update(n);
       if(status.ref){
         status.ref.update();
       }

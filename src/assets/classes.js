@@ -60,7 +60,6 @@ function assert(exp){
 }
 
 function toHex(value, d) {
-  console.log("WHY");
     let r = value.toString(16);
     while (r.length < d) {
         r = '0' + r;
@@ -183,7 +182,23 @@ class RxStatusData extends StatusData{
     this.setting=setting;
     this.rawdata=[];  //追記のみの受信データ
     this.fixed=false; //受信済フラグ
-    this.cache._dec=new BrokenCodeText();
+    this.cache.bct=new BrokenCodeText();
+  }
+  push(d){
+    this.rawdata.push(...d);
+    this.cache.bct.update(d);
+  }
+  /**
+   * この値は追記データ.
+   */
+  get fixedData(){
+    return this.cache.bct.fixed;
+  }
+  /**
+   * この値は追記データではない
+   */
+  get unfixedData(){
+    return this.cache.bct.unfixed;
   }
 }
 
