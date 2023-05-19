@@ -115,7 +115,7 @@ class SinToneSpec extends ToneSpec{
     super("SIN",points,cycle);
   }
   copyFrom(src){
-    this.point=src.point;
+    this.points=src.points;
     this.cycle=src.cycle;
   }
   createInstance(tbsk){
@@ -128,7 +128,7 @@ class XpskSinToneSpec extends ToneSpec{
     this.div=div;
   }
   copyFrom(src){
-    this.point=src.point;
+    this.points=src.points;
     this.cycle=src.cycle;
     this.div=src.div;
   }
