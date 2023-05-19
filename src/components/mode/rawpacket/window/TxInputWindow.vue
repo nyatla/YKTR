@@ -10,23 +10,18 @@
     </div>
     <hr />
     <div class="main">
-      <ul class="tabs">
-        <li v-on:click="changeTab('text')" v-bind:class="{ 'active': active_tab === 'text' }">TEXT</li>
-        <li v-on:click="changeTab('hex')" v-bind:class="{ 'active': active_tab === 'hex' }">HEX</li>
-        <li v-on:click="changeTab('ax25')" v-bind:class="{ 'active': active_tab === 'ax25' }">AX25</li>
-        <li v-on:click="changeTab('cq+')" v-bind:class="{ 'active': active_tab === 'cq+' }">CQ+</li>
-      </ul>
+      <TileSelect :name="'tabselect'" :items="['TEXT','HEX','AX25','CQ']" :defaultSelectedIndex="0" @event-selected="changeTab"></TileSelect>
       <ul class="contents">
-        <li class="text" v-on:click="changeTab('text')" v-if="active_tab === 'text'">
+        <li class="text" v-if="active_tab === 'TEXT'">
           <textarea v-model="textdata"></textarea>
         </li>
-        <li class="hex" v-on:click="changeTab('hex')" v-else-if="active_tab === 'hex'">
+        <li class="hex" v-else-if="active_tab === 'HEX'">
           <div>not implemented!</div>
         </li>
-        <li class="ax25" v-on:click="changeTab('ax25')" v-else-if="active_tab === 'ax25'">
+        <li class="ax25" v-else-if="active_tab === 'AX25'">
           <div>not implemented!</div>
         </li>
-        <li class="cq+" v-on:click="changeTab('cq+')" v-else-if="active_tab === 'cq+'">
+        <li class="cq+" v-else-if="active_tab === 'CQ'">
           <div>not implemented!</div>
         </li>
       </ul>
@@ -42,6 +37,7 @@
 
 import TextView from '@/components/view/TextView.vue';
 import HexView from '@/components/view/HexView.vue';
+import TileSelect from '@/components/ctrl/TileSelect.vue';
 
 
 const utf8encoder = new TextEncoder();
@@ -51,6 +47,7 @@ export default
     components: {
       TextView,
       HexView,
+      TileSelect,
     },    
     props: {
       setting:{
@@ -61,7 +58,7 @@ export default
     },
     data() {
       return {
-        active_tab:"text",
+        active_tab:"TEXT",
         textdata: "",
         txdata:[],//送信データ
         _txdata_delay_tid:null,//送信時間推定のディレイ
@@ -81,8 +78,8 @@ export default
         this.delayUpdate();
         this.$emit("event-transmit",{data:this.txdata});
       },
-      changeTab(num){
-        this.active_tab = num
+      changeTab(event){
+        this.active_tab = event.value;
       }
     },
     beforeDestroy(){

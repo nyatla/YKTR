@@ -55,42 +55,39 @@ export default {
 
 <style scoped lang="less" >
 @import "@/assets/global.less";
-ul {
-    margin: 0;
-    padding: 0;
-    user-select: none;
-  }
+    ul {
+        margin: 0;
+        padding: 0;
+        user-select: none;
+        display: flex;
+    }
+    li {
+        // display: inline-block;
+        display: flex;
+        list-style: none;
+        text-align: center;
+        height: 1.2rem;
+        font-size: 0.6rem;
+        width: 4.5rem;
+        vertical-align: middle;
+        align-items: center;
+        justify-content: center;        
+        cursor: pointer;
+        overflow: hidden;
+        transition: .2s;    
+    }
 
-  li {
-    list-style: none;
-    text-align: center;
-  }
 
-  .tabs {
-    overflow: hidden;
-  }
-
-  .tabs li {
-    display: inline-block;
-    align-items: center;
-    width: 4rem;
-    height: 1rem;
-    padding: .1rem;
-    cursor: pointer;
-    transition: .2s;
-    font-size: 0.5rem;
-  }
-
+    
   .tabs li:not(:first-child),
   .tabs:not(:first-of-type) {
     border-left: none;
   }
 
-  .tabs li.active,
-  .tabs :checked {
-    font-size: 0.8rem;
-    font-weight: bold;
-    cursor: auto;
-    background-color: @yellow;
-  }
+    .tabs li.active,.tabs :checked {
+        font-size: 0.8rem;
+        font-weight: bold;
+        cursor: auto;
+        background-color: @yellow;
+    }
 </style>

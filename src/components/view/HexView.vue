@@ -123,6 +123,7 @@ export default
   td:nth-child(1) {
     font-weight: bold;
     background-color: #bbbbbb;
+    user-select: none;
   }
   th:nth-last-child(1){
     width: 100%;

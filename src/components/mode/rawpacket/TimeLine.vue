@@ -353,7 +353,7 @@ export default {
 
   >button{
     font-size: 1.5rem;
-    width:8rem;
+    width:8.5rem;
     margin:1rem;
   }
 }

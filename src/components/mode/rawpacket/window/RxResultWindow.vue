@@ -14,15 +14,12 @@
     </div>
     <hr />
     <div class="main">
-      <ul class="tabs">
-        <li v-on:click="changeTab('text')" v-bind:class="{ 'active': active_tab === 'text' }">TEXT</li>
-        <li v-on:click="changeTab('hex')" v-bind:class="{ 'active': active_tab === 'hex' }">HEX</li>
-      </ul>
+      <TileSelect :name="'tabselect'" :items="['TEXT','HEX']" :defaultSelectedIndex="0" @event-selected="changeTab"></TileSelect>
       <ul class="contents">
         <li>
           <KeepAlive>
-            <TextView v-if="active_tab === 'text'" ref="textview" :rawdata="status.rawdata"></TextView>
-            <HexView v-else-if="active_tab === 'hex'" ref="hexview" :rawdata="status.rawdata"></HexView>
+            <TextView v-if="active_tab === 'TEXT'" ref="textview" :rawdata="status.rawdata"></TextView>
+            <HexView v-else-if="active_tab === 'HEX'" ref="hexview" :rawdata="status.rawdata"></HexView>
           </KeepAlive>
         </li>
       </ul>
@@ -38,6 +35,7 @@ import {Functions} from '@/assets/classes';
 
 import TextView from '@/components/view/TextView.vue';
 import HexView from '@/components/view/HexView.vue';
+import TileSelect from '@/components/ctrl/TileSelect.vue';
 
 
 
@@ -47,6 +45,7 @@ export default
     components: {
       TextView,
       HexView,
+      TileSelect,
     },    
     props: {
       status:{
@@ -58,7 +57,7 @@ export default
       return {
         _timer:undefined,
         bytes_text:0,
-        active_tab:"text",
+        active_tab:"TEXT",
       }
     },
     mounted(){
@@ -85,8 +84,8 @@ export default
 
 
     methods: {
-      changeTab: function(num){
-        this.active_tab = num
+      changeTab: function(event){
+        this.active_tab = event.value;
       }     
     },
     computed: {
