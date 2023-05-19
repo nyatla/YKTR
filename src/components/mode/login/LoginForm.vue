@@ -81,9 +81,9 @@
 </template>
   
 <script>
-import {FrequencySpec,SinToneSpec,XpskSinToneSpec,ModulationSpec} from '../assets/classes';
-import TileSelect from './ctrl/TileSelect.vue';
-import IntegerInput from './ctrl/IntegerInput.vue';
+import {FrequencySpec,SinToneSpec,XpskSinToneSpec,ModulationSpec} from '@/assets/classes';
+import TileSelect from '@/components/ctrl/TileSelect.vue';
+import IntegerInput from '@/components/ctrl/IntegerInput.vue';
 
 //永続データ
 const FREQUENCY_LIST=
@@ -222,7 +222,7 @@ export default {
 </script>
   
 <style lang="less" scoped>
-@import "../assets/global.less";
+@import "@/assets/global.less";
 .screen{
   .inherit_app_setting;
 }

@@ -2,7 +2,7 @@
     https://cr-vue.mio3io.com/examples/modal.html#%E3%82%BD%E3%83%BC%E3%82%B9%E3%82%B3%E3%83%BC%E3%83%89
 -->
 <template>
-  <div class="overlay" @click.self="$emit('close')">
+  <div class="overlay">
     <slot></slot>
   </div>
 </template>

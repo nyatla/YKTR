@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import {DEFAULT_SETTING, Functions} from "../assets/classes"
+import {DEFAULT_SETTING, Functions} from "@/assets/classes"
 
 
 
@@ -70,7 +70,7 @@ export default
 </script>
 
 <style lang="less" scoped>
-  @import "../assets/global.less";
+  @import "@/assets/global.less";
   .container{
 //    background-color: antiquewhite;
     width: 100%;

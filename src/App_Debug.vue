@@ -15,31 +15,20 @@
       :info="{'line1':'TBSK/16kHz/100TICKS','line2':''}"
       :rawdata="rxresult.rawdata"
     ></TxStatus>
-<!--    
-    <RxStatus
-      :datetime="new Date()"
-      :info="{'line1':'TBSK/16kHz/100TICKS','line2':''}"
-      :rawdata="rxresult.rawdata"
-    ></RxStatus>
-    <RxResultWindow  @close-modal-transmit="close_rxdatainfo" 
-      :datetime="new Date()"
-      :info="{'line1':'TBSK/16kHz/100TICKS','line2':''}"
-      :rawdata="[56,57,58,56,57,58,56,57,58,56,57,58,59,56,57,58,56,57,58,56,57,58,56,57,58,59,2,60,3,4,5,6,50,56,57,58,59,2,60,3,4,5,6,50,56,57,58,59,2,60,3,4,5,6,50]"></RxResultWindow>
-    <TxInputWindow  @close="close_txinput" 
-    ></TxInputWindow>
--->
+
+    
 </div>
 </template>
 
 <script>
-import LoginForm from './components/LoginForm.vue'
+import LoginForm from './components/mode/login/LoginForm.vue'
 
-import StatusDashBoard from './components/StatusDashboard.vue'
-import TxStatus from './components/status/TxStatus.vue'
-import RxStatus from './components/status/RxStatus.vue'
+import StatusDashBoard from './components/mode/rawpacket/StatusDashboard.vue'
+import TxStatus from './components/mode/rawpacket/status/TxStatus.vue'
+import RxStatus from './components/mode/rawpacket/status/RxStatus.vue'
 
-import RxResultWindow from './components/window/RxResultWindow.vue'
-import TxInputWindow from './components/window/TxInputWindow.vue'
+import RxResultWindow from './components/mode/rawpacket/window/RxResultWindow.vue'
+import TxInputWindow from './components/mode/rawpacket/window/TxInputWindow.vue'
 export default
 {
   components: {

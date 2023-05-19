@@ -38,14 +38,14 @@
 
   
 <script>
-import {assert,BrokenCodeText} from "../assets/classes"
+import {assert} from "@/assets/classes"
+import ModalFrame from '@/components/ctrl/ModalFrame.vue';
 import RxStatus from './status/RxStatus.vue';
 import TxStatus from './status/TxStatus.vue';
 import StatusDashboard from './StatusDashboard.vue';
 import RxResultWindow from './window/RxResultWindow.vue';
 import TxResultWindow from './window/TxResultWindow.vue';
 import TxInputWindow from './window/TxInputWindow.vue';
-import ModalFrame from './ctrl/ModalFrame.vue';
 
 class Stopwatch {
   constructor() {
@@ -180,6 +180,9 @@ export default {
     return this._socket.waitCloseAS();//Promise
   },
   computed:{
+    transmit_button_active(){
+
+    },
     selected_rx_status(){
       let status = this.application.statuses.statusOfSid(this.selected_sid);
       assert(status && status.type=="rx");
@@ -233,7 +236,7 @@ export default {
     },
     OnTransmit(event){
       let ts=this._addNewTx(event.data);
-      this.active_tx_sid=ts.sid;
+      this.active_tx_sid=ts.sid;//sendが完了したときにundefinedにする。
       this.modal="";
       //レンダリングを待つのだ。
       this.$nextTick(()=>{
@@ -260,6 +263,7 @@ export default {
       if(status.ref){
         status.ref.setTxData();
       }
+      this.active_tx_sid=undefined;
     },
     async close() {
       this.modal="";//modalのクローズ
@@ -272,7 +276,7 @@ export default {
     {
       console.log("detected",event.id);
       let rs=this._addNewRx();
-      this.active_rx_sid = rs.sid;
+      this.active_rx_sid = rs.sid;//lostしたときにundefinedにする.
     },
     // eslint-disable-next-line no-unused-vars
     message(event) {
@@ -303,7 +307,7 @@ export default {
 </script>
   
 <style lang="less" scoped>
-  @import "../assets/global.less";
+  @import "@/assets/global.less";
 
 
   

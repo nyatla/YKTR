@@ -30,11 +30,11 @@
 </template>
 
 <script>
-import {Functions} from '../../assets/classes';
+import {Functions} from '@/assets/classes';
 
-import TextView from '../view/TextView.vue';
-import HexView from '../view/HexView.vue';
-import AdaptiveScrollDiv from '../ctrl/AdaptiveScrollDiv.vue';
+import TextView from '@/components/view/TextView.vue';
+import HexView from '@/components/view/HexView.vue';
+import AdaptiveScrollDiv from '@/components/ctrl/AdaptiveScrollDiv.vue';
 
 /**
  * 

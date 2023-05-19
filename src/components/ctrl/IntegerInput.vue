@@ -41,7 +41,7 @@
           return false;
         }
         let n=Number.parseInt(text,10);
-        if(n>this.max || n<this.min){
+        if(isNaN(n) || n>this.max || n<this.min){
           return false;
         }
         return n;

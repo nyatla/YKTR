@@ -40,9 +40,8 @@
 
 <script>
 
-import TextView from '../view/TextView.vue';
-import HexView from '../view/HexView.vue';
-import {DEFAULT_SETTING} from '../../assets/classes';
+import TextView from '@/components/view/TextView.vue';
+import HexView from '@/components/view/HexView.vue';
 
 
 const utf8encoder = new TextEncoder();
@@ -56,7 +55,7 @@ export default
     props: {
       setting:{
         type:Object,
-        default:DEFAULT_SETTING
+        required:true,
       },
 
     },
@@ -127,7 +126,7 @@ export default
 
 <style lang="less" scoped>
 @import "@/assets/global.less";
-@import "./window.less";
+@import "@/components/window/window.less";
 
 
 

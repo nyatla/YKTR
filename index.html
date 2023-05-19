@@ -20,6 +20,14 @@
     <meta name="twitter:title" content="TBSK Transceiver">
     <meta name="twitter:description" content="This application is an audio transceiver software with TBSK modulation signals. It allows direct communication between browsers using a built in audio devices. It enables communication with other TBSK-compatible devices and software as well.">
     <meta name="twitter:image" content="./icon144.png">
+    <script>
+      console.log(location.host);
+      if (location.protocol === 'http:' && location.hostname!='localhost') {
+        var secureUrl = 'https://' + location.host + location.pathname + location.search;
+        location.href = secureUrl;
+      }
+    </script>
+    
   </head>
   <body>
     <noscript>

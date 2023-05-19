@@ -26,13 +26,13 @@ function getiOSVersion(){
 }
 
 import img_logo from '@/assets/icon256.png'
-import WarningIos from './components/window/WarningIos.vue'
-import ModalFrame from './components/ctrl/ModalFrame.vue'
+import WarningIos from '@/components/window/WarningIos.vue'
+import ModalFrame from '@/components/ctrl/ModalFrame.vue'
 
-import LoginForm from './components/LoginForm.vue'
-import TimeLine from './components/TimeLine.vue'
-import {assert,Application} from './assets/classes'
-import App_Debug from './App_Debug.vue'
+import LoginForm from '@/components/mode/login/LoginForm.vue'
+import TimeLine from '@/components/mode/rawpacket/TimeLine.vue'
+import {assert,Application} from '@/assets/classes'
+import App_Debug from '@/App_Debug.vue'
 import {TBSKmodemJS} from "tbskmodem-js"
 
 export default {
@@ -93,7 +93,7 @@ export default {
 </script>
 
 <style lang="less">
-@import "./assets/global.less";
+@import "@/assets/global.less";
 
 .area{
   padding:0 2.5vw;

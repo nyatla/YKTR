@@ -40,10 +40,10 @@
 </template>
 
 <script>
-import {Functions} from '../../assets/classes';
+import {Functions} from '@/assets/classes';
 
-import TextView from '../view/TextView.vue';
-import HexView from '../view/HexView.vue';
+import TextView from '@/components/view/TextView.vue';
+import HexView from '@/components/view/HexView.vue';
 
 
 
@@ -113,7 +113,7 @@ export default
 
 <style lang="less" scoped>
 @import "@/assets/global.less";
-@import "./window.less";
+@import "@/components/window/window.less";
 
 
 
