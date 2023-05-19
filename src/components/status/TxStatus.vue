@@ -11,7 +11,7 @@
         <div>{{ status.rawdata.length }} byte</div>
         <AdaptiveScrollDiv ref="scrolldiv">
             <div v-if="mode==0" class="statictext">{{ static_message }}</div>
-            <div v-if="mode==1" class="txtext">
+            <div v-else-if="mode==1" class="txtext">
               <template v-for="(c, i) in txdata" >
                 <span v-if="c[0]==0" :key="'s'+i">{{c[1]}} </span>
                 <span v-else="c[0]==1" class="hexascii" :key="'h'+i">{{c[1]}}</span>
@@ -69,7 +69,7 @@ export default
     mounted(){
       if(this.status.fixed){
 
-        this.$refs.scrolldiv.setMode(0,true);
+        this.$refs.scrolldiv.setMode(10,true);
         this.initTxData();
         this.mode=1;
       }else{

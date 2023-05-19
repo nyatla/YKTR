@@ -153,7 +153,7 @@ export default {
         break;
       }
     }
-    console.log("init",this.tones);
+    // console.log("init",this.tones);
   },
   methods: {
     freqSelected() {

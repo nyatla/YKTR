@@ -241,20 +241,25 @@ export default {
         this._socket.send(ts.rawdata);
       });
     },
-    async OnModalClose(event){
+    OnModalClose(event){
       this.modal="";
     },
+    OnBreak(event){
+      this.modal="";
+    },
+
     sendstart(event){
       let status = this._statusOfSid(this.active_tx_sid);
       status.ref.setMessage("Transmiting");
     },
-    sendcompleted(event){
+    async sendcompleted(event){
       let status = this._statusOfSid(this.active_tx_sid);
       status.ref.setMessage("Completed");
-      setTimeout(()=>{
+      status.fixed=true;
+      await new Promise(resolve => setTimeout(resolve, 500));
+      if(status.ref){
         status.ref.setTxData();
-        status.fixed=true;
-      },500);
+      }
     },
     async close() {
       this.modal="";//modalのクローズ

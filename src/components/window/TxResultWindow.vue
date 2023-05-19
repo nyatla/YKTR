@@ -10,8 +10,8 @@
       <div class="info">
         <div>{{ line1 }}</div>
         <div>
-          <span v-if="!status.fixed">Transmitting...</span>
-          <span v-if="status.fixed">{{ status.rawdata.length }}<span class="small"> bytes transmitted.</span></span>          
+          <span v-if="now_transmit">Transmitting...</span>
+          <span v-else>{{ status.rawdata.length }}<span class="small"> bytes transmitted.</span></span>          
         </div>
       </div>
     </div>
@@ -33,13 +33,14 @@
       </ul>
     </div>
     <div class="footer">
+      <button :disabled="!now_transmit" @click="()=>{$emit('event-break')}">Break</button>
       <button @click="()=>{$emit('event-close')}">Close</button>
     </div>
   </div>
 </template>
 
 <script>
-import {Functions, assert} from '../../assets/classes';
+import {Functions} from '../../assets/classes';
 
 import TextView from '../view/TextView.vue';
 import HexView from '../view/HexView.vue';
@@ -61,6 +62,7 @@ export default
     },
     data() {
       return {
+        now_transmit:false,
         _timer:undefined,
         bytes_text:0,        
         active_tab:"text",
@@ -69,6 +71,7 @@ export default
     mounted(){
       const _t=this;
       function update(){
+        _t.now_transmit=!_t.status.fixed;
         _t.bytes_text=_t.status.rawdata.length;
         if(_t.$refs.textview){
           _t.$refs.textview.update();
@@ -85,7 +88,9 @@ export default
       });
     },
     beforeUnmount() {
-      clearInterval(this._timer);
+      if(this._timer){
+        clearInterval(this._timer);
+      }
     },
 
     methods: {
