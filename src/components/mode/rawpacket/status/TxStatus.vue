@@ -85,8 +85,10 @@ export default
         this.txdata.push(...f);
         this.txdata.push(...u);
       },
-      setMessage(message){
-        this.static_message=message;
+      setMessage()
+      {
+        const tbl={new:"",modulate:"Modulating",transmit:"Transmitting",break:"Breaked",complete:"Completed"};
+        this.static_message=tbl[this.status.state];
         this.mode=0;
         this.$refs.scrolldiv.setMode(11,true);
       },

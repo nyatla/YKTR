@@ -201,13 +201,25 @@ class TxStatusData extends StatusData{
     super(sid,"tx");
     this.setting=setting;
     this.rawdata=[];  //追記のみの送信データ
-    this.fixed=false;//送信済みフラグ
+    this._state="new";//new,modulate,transmit,break,completeの何れか
+    this._fixed=false;//送信済みフラグ
     this.cache.bct=new BrokenCodeText();
     this.cache.tx_txdata=0;
   }
   push(d){
     this.rawdata.push(...d);
     this.cache.bct.update(d);
+  }
+  get state(){
+    return this._state;
+  }
+  set state(v){
+    console.log(v);
+    assert(["new","modulate","transmit","break","complete"].includes(v));
+    this._state=v;
+  }
+  get fixed(){
+    return ["break","complete"].includes(this._state);
   }
   /**
    * この値は追記データ.

@@ -24,10 +24,14 @@
       <RxResultWindow  :status="selected_rx_status" @event-close="OnModalClose"></RxResultWindow>
     </ModalFrame>
     <ModalFrame v-if="modal=='tx'">
-      <TxResultWindow  :status="selected_tx_status" @event-close="OnModalClose"></TxResultWindow>
+      <TxResultWindow :status="selected_tx_status"
+        @event-close="OnModalClose"
+        @event-break="OnTxBreak"
+        @event-repeat="OnTxRepeat"
+      ></TxResultWindow>
     </ModalFrame>
     <ModalFrame v-if="modal=='newtx'">
-      <TxInputWindow  :setting="setting" @event-transmit="OnTransmit" @event-close="OnModalClose"></TxInputWindow>
+      <TxInputWindow ref="txinput" :setting="setting" @event-transmit="OnTransmit" @event-close="OnModalClose"></TxInputWindow>
     </ModalFrame>
 
 
@@ -240,25 +244,43 @@ export default {
       this.modal="";
       //レンダリングを待つのだ。
       this.$nextTick(()=>{
-        ts.ref.setMessage("Modulating");
+        ts.state="modulate";
+        ts.ref.setMessage();
         this._socket.send(ts.rawdata);
       });
     },
     OnModalClose(event){
       this.modal="";
     },
-    OnBreak(event){
-      this.modal="";
+    OnTxBreak(event){
+      const ts=event.status;
+      this._socket.cancelSend();
+      ts.state="break";
+      ts.ref.setMessage();
+      this.$nextTick(()=>{
+        this.modal="";
+      });
+    },
+    OnTxRepeat(event){
+      const _t=this;
+      const ts=event.status;
+      this.modal="newtx";
+      this.$nextTick(()=>{
+        _t.$refs.txinput.setData("text",ts.rawdata);
+      });
     },
 
     sendstart(event){
       let status = this._statusOfSid(this.active_tx_sid);
-      status.ref.setMessage("Transmiting");
+      status.state="transmit";
+      status.ref.setMessage();
     },
     async sendcompleted(event){
       let status = this._statusOfSid(this.active_tx_sid);
-      status.ref.setMessage("Completed");
-      status.fixed=true;
+      if(status.state!="break"){
+        status.state="complete";
+      }
+      status.ref.setMessage();
       await new Promise(resolve => setTimeout(resolve, 500));
       if(status.ref){
         status.ref.setTxData();
@@ -281,12 +303,7 @@ export default {
     // eslint-disable-next-line no-unused-vars
     message(event) {
       let status = this._statusOfSid(this.active_rx_sid);
-//      let n=[];
       status.push(event.data);
-//       for(let i of event.data){
-// //        n.push(i);
-//       }
-//      status.cache._dec.update(n);
       if(status.ref){
         status.ref.update();
       }

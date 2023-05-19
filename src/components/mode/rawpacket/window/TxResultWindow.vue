@@ -30,7 +30,8 @@
       </ul>
     </div>
     <div class="footer">
-      <button :disabled="!now_transmit" @click="()=>{$emit('event-break')}">Break</button>
+      <button v-if="now_transmit" @click="()=>{$emit('event-break',{status:status})}">Break</button>
+      <button v-if="!now_transmit" @click="()=>{$emit('event-repeat',{status:status})}">Repeat</button>
       <button @click="()=>{$emit('event-close')}">Close</button>
     </div>
   </div>

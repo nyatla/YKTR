@@ -38,6 +38,7 @@
 import TextView from '@/components/view/TextView.vue';
 import HexView from '@/components/view/HexView.vue';
 import TileSelect from '@/components/ctrl/TileSelect.vue';
+import { assert } from '../../../../assets/classes';
 
 
 const utf8encoder = new TextEncoder();
@@ -65,6 +66,11 @@ export default
       }
     },
     methods: {
+      setData(type,data){
+        assert(type=="text");
+        let dec = new TextDecoder();
+        this.textdata=dec.decode(Uint8Array.from(data));
+      },
       delayUpdate(){
         this.txdata=utf8encoder.encode(this.textdata);
       },
